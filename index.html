@@ -1,0 +1,1625 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plan de classe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ardoise:#22362E; --papier:#F1EFE8; --blanc:#fff;
+  --encre:#18211D; --encre-doux:#5C6862;
+  --bois:#8A7351; --ligne:#D5D1C6;
+  --vert:#2F6B4F; --vert-clair:#E4EFE7;
+  --rouge:#A3261E; --rouge-clair:#FBE9E7;
+  --ambre:#B0790A; --bleu:#3A6EA5;
+  --z:1;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:'Public Sans',system-ui,-apple-system,'Segoe UI',sans-serif;color:var(--encre);
+  background:var(--papier);font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased;overflow:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+
+.topbar{display:flex;align-items:center;gap:12px;background:var(--ardoise);color:#EDEAE0;
+  padding:10px 16px;border-bottom:3px solid var(--bois);height:60px}
+.wordmark{font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:21px;white-space:nowrap}
+.wordmark span{color:#9CC3AC}
+.classname{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.22);
+  border-radius:7px;padding:7px 11px;color:#fff;width:190px}
+.classname::placeholder{color:rgba(255,255,255,.5)}
+.spacer{flex:1}
+.btn{border:1px solid var(--ligne);background:var(--blanc);border-radius:8px;padding:7px 12px;font-weight:600}
+.btn:hover{background:#FAF9F5}
+.btn:active{transform:translateY(1px)}
+.btn.primary{background:var(--vert);border-color:var(--vert);color:#fff}
+.btn.primary:hover{background:#28583F}
+.btn.ghost{background:transparent;border-color:rgba(255,255,255,.28);color:#EDEAE0}
+.btn.ghost:hover{background:rgba(255,255,255,.1)}
+.btn.small{padding:4px 9px;font-size:12.5px;border-radius:6px}
+.btn.danger{border-color:var(--rouge);color:var(--rouge)}
+
+.layout{display:flex;height:calc(100% - 60px)}
+.rail{width:392px;flex:none;overflow-y:auto;background:var(--blanc);border-right:1px solid var(--ligne)}
+.stage{flex:1;display:flex;flex-direction:column;min-width:0}
+.viewport{flex:1;overflow:auto;padding:22px;position:relative;background:
+  radial-gradient(circle at 1px 1px, rgba(24,33,29,.09) 1px, transparent 0) 0 0/24px 24px, var(--papier)}
+
+.panel{border-bottom:1px solid var(--ligne)}
+.panel>summary{list-style:none;cursor:pointer;padding:13px 18px;display:flex;align-items:center;gap:9px;font-weight:700}
+.panel>summary::-webkit-details-marker{display:none}
+.panel>summary::before{content:"";width:7px;height:7px;border-right:2px solid var(--encre-doux);
+  border-bottom:2px solid var(--encre-doux);transform:rotate(-45deg);transition:transform .15s}
+.panel[open]>summary::before{transform:rotate(45deg)}
+.panel .count{margin-left:auto;font-weight:600;font-size:12px;color:var(--encre-doux);
+  background:var(--papier);border-radius:20px;padding:1px 9px}
+.body{padding:2px 18px 18px}
+.field{margin-bottom:12px}
+.field>label{display:block;font-weight:600;margin-bottom:5px;font-size:13px}
+.hint{color:var(--encre-doux);font-size:12.5px;margin:4px 0 0}
+input[type=text],input[type=number],select,textarea{width:100%;border:1px solid var(--ligne);
+  border-radius:8px;padding:8px 10px;background:var(--blanc)}
+textarea{min-height:140px;resize:vertical;line-height:1.5}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--vert);outline-offset:1px}
+.row{display:flex;gap:9px}
+.row>*{flex:1}
+.check{display:flex;gap:8px;align-items:flex-start;margin:8px 0;font-size:13px}
+.check input{margin-top:3px;flex:none;width:auto}
+.sub{font-weight:700;font-size:12.5px;margin:16px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--ligne)}
+.presets{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--ligne);background:var(--papier);border-radius:20px;padding:5px 11px;
+  font-size:12.5px;font-weight:600}
+.chip:hover{border-color:var(--vert);color:var(--vert)}
+.chip.on{background:var(--ardoise);border-color:var(--ardoise);color:#fff}
+.chip.on:hover{color:#fff}
+
+.clist{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.clist li{display:flex;align-items:center;gap:9px;border:1px solid var(--ligne);border-left:4px solid var(--bois);
+  border-radius:7px;padding:7px 9px;background:var(--papier);font-size:13px}
+.clist li.sep{border-left-color:var(--rouge)}
+.clist li.tog{border-left-color:var(--vert)}
+.clist li.solo{border-left-color:var(--ambre)}
+.clist li.zone{border-left-color:var(--bleu)}
+.clist li.absent{border-left-color:var(--encre-doux)}
+.clist .x{margin-left:auto;border:0;background:transparent;color:var(--encre-doux);font-size:17px;padding:0 3px}
+.clist .x:hover{color:var(--rouge)}
+.empty{color:var(--encre-doux);font-size:13px;font-style:italic;margin-top:10px}
+
+.toolbar{display:flex;align-items:center;gap:8px;padding:9px 18px;background:var(--blanc);
+  border-bottom:1px solid var(--ligne);flex-wrap:wrap;min-height:52px}
+.modeswitch{display:flex;background:var(--papier);border:1px solid var(--ligne);border-radius:9px;overflow:hidden}
+.modeswitch button{border:0;background:transparent;padding:7px 15px;font-weight:600}
+.modeswitch button[aria-pressed=true]{background:var(--ardoise);color:#fff}
+.tsep{width:1px;height:24px;background:var(--ligne);margin:0 3px}
+.tinfo{color:var(--encre-doux);font-size:12.5px}
+
+.canvaswrap{position:relative;margin:0 auto;transform-origin:top left}
+.canvas{position:relative;background:var(--blanc);border:1px solid var(--ligne);border-radius:4px;
+  box-shadow:0 2px 10px rgba(24,33,29,.06)}
+.board{position:absolute;left:8%;right:8%;top:14px;height:38px;background:var(--ardoise);color:#CFE0D5;
+  border:5px solid var(--bois);border-bottom-width:8px;border-radius:4px;display:flex;align-items:center;
+  justify-content:center;font-family:'Fraunces',Georgia,serif;letter-spacing:.07em;font-size:16px}
+.links{position:absolute;inset:0;pointer-events:none;overflow:visible}
+
+.seat{position:absolute;background:var(--blanc);border:1.5px solid var(--bois);border-radius:7px;
+  display:flex;align-items:center;justify-content:center;text-align:center;padding:3px 5px;
+  font-size:var(--sf,13px);font-weight:500;overflow:hidden;user-select:none}
+.seat .nm{pointer-events:none;line-height:1.15}
+.seat.free{background:#FBFAF6;color:#BEB9AC;font-size:11.5px;font-weight:400;border-style:dashed}
+.seat.occupied{cursor:grab}
+.seat.dragging{opacity:.35}
+.seat.target{background:var(--vert-clair);box-shadow:0 0 0 2px var(--vert)}
+.seat.selected{box-shadow:0 0 0 2px var(--ardoise)}
+.seat.conflict{background:var(--rouge-clair);border-color:var(--rouge)}
+.seat.conflict .nm{color:var(--rouge)}
+.room-mode .seat{cursor:move}
+.mark{position:absolute;top:1px;right:3px;font-size:9.5px;pointer-events:none}
+.mark .warn{color:var(--rouge);font-weight:700}
+
+.decor{position:absolute;border:1.5px dashed var(--encre-doux);border-radius:5px;background:rgba(24,33,29,.035);
+  color:var(--encre-doux);font-size:12px;display:flex;align-items:center;justify-content:center;
+  user-select:none;padding:2px 4px;text-align:center}
+.room-mode .decor{cursor:move}
+.decor.selected{box-shadow:0 0 0 2px var(--ardoise)}
+.iline{display:flex;align-items:center;gap:7px;margin-bottom:7px;font-size:13px}
+.iline input{width:56px;flex:none;text-align:center;padding:6px 4px}
+.iline .x{border:0;background:transparent;color:var(--encre-doux);font-size:17px;padding:0 3px;margin-left:auto}
+.iline .x:hover{color:var(--rouge)}
+.emptystate{position:absolute;left:50%;top:54%;transform:translate(-50%,-50%);text-align:center;
+  color:var(--encre-doux);max-width:440px;padding:0 20px}
+.emptystate h4{font-family:'Fraunces',Georgia,serif;font-size:20px;margin:0 0 6px;color:var(--encre)}
+.emptystate .es-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+
+.marquee{position:absolute;border:1.5px solid var(--vert);background:rgba(47,107,79,.09);pointer-events:none}
+
+.bottom{border-top:1px solid var(--ligne);background:var(--blanc);display:flex;align-items:stretch;max-height:172px}
+.bench{flex:1;padding:11px 16px;overflow:auto;min-width:0}
+.bench h3{margin:0 0 8px;font-size:12.5px;font-weight:700}
+.pool{display:flex;flex-wrap:wrap;gap:6px;min-height:36px;border:1px dashed var(--ligne);border-radius:9px;padding:7px}
+.pool.target{border-color:var(--vert);background:var(--vert-clair)}
+.tag{background:var(--papier);border:1px solid var(--ligne);border-radius:7px;padding:4px 9px;font-size:13px;cursor:grab}
+.tag.absent{opacity:.5;text-decoration:line-through;cursor:default}
+.alerts{width:400px;flex:none;border-left:1px solid var(--ligne);padding:11px 16px;overflow:auto}
+.alerts h3{margin:0 0 8px;font-size:12.5px;font-weight:700;display:flex;align-items:center;gap:8px}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--vert)}
+.dot.bad{background:var(--rouge)}
+.alerts ul{list-style:none;margin:0;padding:0}
+.alerts li{padding:5px 0;border-top:1px solid var(--ligne);font-size:12.5px}
+.alerts li b{color:var(--rouge)}
+
+.toast{position:fixed;left:50%;bottom:190px;transform:translateX(-50%) translateY(10px);background:var(--ardoise);
+  color:#fff;padding:11px 17px;border-radius:10px;box-shadow:0 8px 26px rgba(24,33,29,.3);opacity:0;
+  pointer-events:none;transition:opacity .18s,transform .18s;max-width:70ch;z-index:60}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.warn{background:var(--rouge)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+.printhead{display:none}
+@media print{
+  @page{size:A4 landscape;margin:10mm}
+  html,body{overflow:visible;height:auto;width:auto}
+  .topbar,.rail,.toolbar,.bottom,.toast{display:none!important}
+  .layout{display:block;height:auto}
+  .stage{display:block}
+  .viewport{overflow:visible;padding:0;background:#fff;display:block;page-break-inside:avoid;break-inside:avoid}
+  .canvaswrap{margin:0 auto;page-break-inside:avoid;break-inside:avoid}
+  .emptystate{display:none}
+  .canvas{border:0;box-shadow:none}
+  .seat.conflict{background:#fff;border-color:#666}
+  .seat.free{border-color:#bbb}
+  .printhead{display:flex!important;justify-content:space-between;align-items:baseline;
+    font-family:'Fraunces',Georgia,serif;font-size:17px;margin-bottom:6px}
+  .links{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wordmark">Plan de <span>classe</span></div>
+  <input class="classname" id="className" placeholder="Nom de la classe" autocomplete="off">
+  <div class="spacer"></div>
+  <button class="btn primary" id="btnSolve">Générer le plan</button>
+  <button class="btn ghost" id="btnSave">Enregistrer</button>
+  <select id="loadSel" class="btn ghost" style="max-width:160px;background:transparent"><option value="">Ouvrir…</option></select>
+  <button class="btn ghost" id="btnExport">Exporter</button>
+  <button class="btn ghost" id="btnImport">Importer</button>
+  <button class="btn ghost" id="btnPrint">Imprimer</button>
+</div>
+
+<div class="layout">
+  <aside class="rail">
+
+    <details class="panel" open>
+      <summary>1 · La salle <span class="count" id="seatCount">0 places</span></summary>
+      <div class="body">
+        <p class="hint" style="margin-top:0">Pars d'un modèle, puis compose ta salle librement en mode <b>Modifier la salle</b>. Chaque place se déplace et pivote séparément ; approche-la d'une autre et elle vient s'y coller. Double-clic sur une place pour attraper toute la table.</p>
+
+        <div class="sub">Point de départ</div>
+        <div class="row field">
+          <div><label for="nbSeats">Places dans la salle</label><input type="number" id="nbSeats" min="1" max="60" value="30"></div>
+          <div><label for="nbStudents">Élèves dans la classe</label><input type="number" id="nbStudents" min="1" max="60" placeholder="—"></div>
+        </div>
+        <label style="display:block;font-weight:600;margin-bottom:5px;font-size:13px">Modèle de salle</label>
+        <div class="presets" id="models">
+          <button class="chip" data-model="rangees">Rangées</button>
+          <button class="chip" data-model="ilots">Îlots</button>
+          <button class="chip" data-model="arcs">Arcs de cercle</button>
+          <button class="chip" data-model="u">En U</button>
+          <button class="chip" data-model="vide">Salle vide</button>
+        </div>
+        <p class="hint" id="roomStatus"></p>
+
+<div id="compRangees">
+        <div class="sub">Composer des rangées</div>
+        <div class="row field">
+          <div><label for="nbCols">Colonnes</label><input type="number" id="nbCols" min="1" max="8" value="3"></div>
+          <div><label for="nbRangs">Rangs par colonne</label><input type="number" id="nbRangs" min="1" max="10" value="5"></div>
+        </div>
+        <div id="rowLines"></div>
+        <button class="btn small" id="btnAddCol">+ Ajouter une colonne</button>
+        <div class="row" style="margin-top:10px">
+          <button class="btn primary" id="btnRows">Créer la salle</button>
+          <button class="btn" id="btnRowsAdd">Ajouter à la salle</button>
+        </div>
+        <p class="hint">Une colonne est une file de tables du tableau vers le fond. Chaque colonne peut avoir son propre nombre de tables et sa propre taille de table.</p>
+
+        </div>
+<div id="compIlots">
+        <div class="sub">Composer des îlots</div>
+        <div id="ilotLines"></div>
+        <button class="btn small" id="btnAddLine">+ Ajouter une autre taille d'îlot</button>
+        <div class="row" style="margin-top:10px">
+          <button class="btn primary" id="btnIlots">Créer la salle</button>
+          <button class="btn" id="btnIlotsAdd">Ajouter à la salle</button>
+        </div>
+        <p class="hint">Les îlots sont posés en rangées, les plus larges d'abord. Un îlot de 4 fait deux rangs de 2, un îlot de 3 une seule rangée. Tout reste déplaçable ensuite.</p>
+
+        </div>
+<div id="compArcs">
+        <div class="sub">Composer des arcs de cercle</div>
+        <div id="arcLines"></div>
+        <button class="btn small" id="btnAddArcLine">+ Ajouter un arc</button>
+        <div class="field" style="margin-top:10px">
+          <label for="aG">Écart entre les tables d'un même arc (px)</label>
+          <input type="number" id="aG" min="0" max="120" value="6">
+        </div>
+        <div class="row">
+          <button class="btn primary" id="btnArcs">Créer la salle</button>
+          <button class="btn" id="btnArcsAdd">Ajouter à la salle</button>
+        </div>
+        <p class="hint">Le premier arc de la liste est le plus proche du tableau. L'ouverture règle la courbure : 40° donne un arc presque droit, 120° un large demi-cercle.</p>
+
+        </div>
+<div id="compU">
+        <div class="sub">Composer un U</div>
+        <div class="row field">
+          <div><label for="uBottom">Places au fond</label><input type="number" id="uBottom" min="1" max="16" value="10"></div>
+          <div><label for="uSide">Places par aile</label><input type="number" id="uSide" min="0" max="12" value="7"></div>
+        </div>
+        <p class="hint" id="uTotal" style="margin:0 0 10px"></p>
+        <div class="row">
+          <button class="btn primary" id="btnU">Créer la salle</button>
+          <button class="btn" id="btnUAdd">Ajouter à la salle</button>
+        </div>
+        <p class="hint">Les deux ailes remontent vers le tableau, de part et d'autre de la rangée du fond.</p>
+        </div>
+<div id="compVide">
+        <div class="sub">Salle vide</div>
+        <p class="hint" style="margin-top:0">Pose tes tables une par une avec l'outil ci-dessous, ou depuis les raccourcis affichés au centre du plan. Chaque table se déplace et pivote ensuite librement.</p>
+        </div>
+        <div class="sub">Ajouter une table</div>
+        <div class="row field">
+          <div><label for="tN">Places côte à côte</label><input type="number" id="tN" min="1" max="12" value="2"></div>
+          <div><label for="tR">Rangs</label><input type="number" id="tR" min="1" max="4" value="1"></div>
+        </div>
+        <button class="btn" id="btnAddTable" style="width:100%">Ajouter cette table</button>
+        <p class="hint">2 places sur 1 rang = une table double. 2 places sur 2 rangs = un îlot de 4.</p>
+
+        <div class="sub">Repères</div>
+        <div class="presets" id="decorBtns">
+          <button class="chip" data-decor="Bureau">Bureau</button>
+          <button class="chip" data-decor="Porte">Porte</button>
+          <button class="chip" data-decor="Fenêtres">Fenêtres</button>
+          <button class="chip" data-decor="Piano">Piano</button>
+          <button class="chip" data-decor="Repère">Repère libre</button>
+        </div>
+
+        <div class="sub">Affichage</div>
+        <label class="check"><input type="checkbox" id="viewTeacher">
+          <span>Vue depuis le bureau : le plan pivote d'un demi-tour, tableau en bas de la page. C'est ce que tu vois debout face à la classe, feuille en main.</span></label>
+        <label class="check"><input type="checkbox" id="showLinks" checked>
+          <span>Montrer les voisinages détectés quand je modifie la salle</span></label>
+        <label class="check"><input type="checkbox" id="fitPrint" checked>
+          <span>À l'impression, réduire le plan pour qu'il tienne sur une seule feuille A4 paysage</span></label>
+        <label class="check"><input type="checkbox" id="wideNeighbour">
+          <span>Voisinage élargi : compter aussi les élèves de la rangée devant ou derrière, même à travers une allée</span></label>
+      </div>
+    </details>
+
+    <details class="panel" open>
+      <summary>2 · Les élèves <span class="count" id="stuCount">0</span></summary>
+      <div class="body">
+        <label for="paste">Colle ici la liste de la classe, un élève par ligne</label>
+        <textarea id="paste" placeholder="DUPONT Léa&#10;MARTIN Tom&#10;3. Nguyen Chloé&#10;Bernard;Hugo"></textarea>
+        <p class="hint">Les numéros de début de ligne, les tabulations et les points-virgules sont gérés. Un nom en majuscules est reconnu comme nom de famille.</p>
+        <div class="row" style="margin-top:10px">
+          <button class="btn primary" id="btnLoadStudents">Charger la liste</button>
+          <select id="nameStyle">
+            <option value="prenom">Prénom</option>
+            <option value="prenomN" selected>Prénom + initiale</option>
+            <option value="complet">Nom complet</option>
+          </select>
+        </div>
+        <p class="hint" id="loadNote"></p>
+      </div>
+    </details>
+
+    <details class="panel" open>
+      <summary>3 · Les contraintes <span class="count" id="conCount">0</span></summary>
+      <div class="body">
+        <div class="field"><label for="cType">Type de contrainte</label>
+          <select id="cType">
+            <option value="separate">Ne doivent pas être voisins</option>
+            <option value="together">Doivent être voisins</option>
+            <option value="alone">Seul à sa table</option>
+            <option value="front">Placé devant</option>
+            <option value="back">Placé au fond</option>
+            <option value="left">Côté gauche de la salle</option>
+            <option value="right">Côté droit de la salle</option>
+            <option value="absent">Absent, ne pas placer</option>
+          </select></div>
+        <div class="field"><label for="cA">Élève</label><select id="cA"></select></div>
+        <div class="field" id="wrapB"><label for="cB">Et</label><select id="cB"></select></div>
+        <button class="btn primary" id="btnAddC" style="width:100%">Ajouter la contrainte</button>
+        <ul class="clist" id="clist"></ul>
+        <p class="empty" id="cEmpty">Aucune contrainte pour l'instant.</p>
+        <p class="hint" style="margin-top:14px">Pour figer un élève à une place précise, clique sur sa table puis sur <b>Épingler</b> : il ne bougera plus lors des générations suivantes.</p>
+      </div>
+    </details>
+  </aside>
+
+  <main class="stage">
+    <div class="toolbar" id="toolbar">
+      <div class="modeswitch" id="modeswitch">
+        <button data-mode="plan" aria-pressed="true">Placer les élèves</button>
+        <button data-mode="room" aria-pressed="false">Modifier la salle</button>
+      </div>
+      <div class="tsep"></div>
+      <button class="btn small" id="zOut">−</button><span class="tinfo" id="zLabel">100 %</span>
+      <button class="btn small" id="zIn">+</button>
+      <button class="btn small" id="zFit">Ajuster</button>
+      <div class="tsep"></div>
+      <span id="ctxTools" style="display:flex;gap:7px;align-items:center;flex-wrap:wrap"></span>
+      <div class="spacer"></div>
+      <span class="tinfo" id="tip"></span>
+    </div>
+
+    <div class="viewport" id="viewport">
+      <div class="printhead"><span id="printTitle">Plan de classe</span><span id="printDate"></span></div>
+      <div class="canvaswrap" id="wrap">
+        <div class="canvas" id="canvas">
+          <div class="board">TABLEAU</div>
+          <svg class="links" id="links"></svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom">
+      <div class="bench">
+        <h3>Élèves non placés</h3>
+        <div class="pool" id="pool"></div>
+      </div>
+      <div class="alerts">
+        <h3><span class="dot" id="alertDot"></span><span id="alertTitle">Aucun conflit</span></h3>
+        <ul id="alertList"></ul>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+<input type="file" id="fileInput" accept="application/json" hidden>
+
+<script>
+'use strict';
+
+/* ===================== constantes ===================== */
+const SW = 112, SH = 58;      // dimensions d'une place
+const LAT = SW * 1.18, LON = SH * 1.25;   // « à côté » : écarts latéral et avant-arrière tolérés
+const LATW = SW * 2.3, LONW = SH * 2.9;   // voisinage élargi
+const $ = id => document.getElementById(id);
+
+/* ===================== état ===================== */
+const S = {
+  room: { w: 1240, h: 820 },
+  seats: [],       // {id,x,y,rot,g}
+  decor: [],       // {id,x,y,w,h,rot,txt}
+  students: [],
+  assign: {},      // seatId -> studentId
+  pinned: new Set(),
+  constraints: [],
+  classSize: 0, fitPrint: true, model: 'rangees',
+  wide: false, teacherView: false, showLinks: true,
+  nameStyle: 'prenomN',
+  mode: 'plan',
+  zoom: 1,
+  sel: new Set(),        // ids sélectionnés en mode salle
+  selStudent: null
+};
+let uid = 1;
+const nid = p => (p || 'i') + (uid++);
+
+/* ===================== stockage ===================== */
+const mem = {};
+const store = {
+  async get(k){
+    try { if (window.storage){ const r = await window.storage.get(k, false); return r ? r.value : null; } } catch(e){}
+    try { return localStorage.getItem('pdc:' + k); } catch(e){}
+    return mem[k] ?? null;
+  },
+  async set(k, v){
+    try { if (window.storage){ await window.storage.set(k, v, false); return; } } catch(e){}
+    try { localStorage.setItem('pdc:' + k, v); return; } catch(e){}
+    mem[k] = v;
+  }
+};
+
+/* ===================== géométrie ===================== */
+const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+const seatById = id => S.seats.find(s => s.id === id);
+
+/* Position de b dans le repère de a : x = latéral (à côté), y = devant/derrière */
+function rel(a, b){
+  const t = -a.rot * Math.PI / 180, dx = b.x - a.x, dy = b.y - a.y;
+  return { x: dx * Math.cos(t) - dy * Math.sin(t), y: dx * Math.sin(t) + dy * Math.cos(t) };
+}
+function near(a, b, lat, lon){
+  const p = rel(a, b), q = rel(b, a);
+  return Math.abs(p.x) <= lat && Math.abs(p.y) <= lon
+      && Math.abs(q.x) <= lat && Math.abs(q.y) <= lon;
+}
+function neighboursOf(seat){
+  const lat = S.wide ? LATW : LAT, lon = S.wide ? LONW : LON;
+  return S.seats.filter(s => s !== seat && near(seat, s, lat, lon));
+}
+function tableMates(seat){
+  return S.seats.filter(s => s !== seat && near(seat, s, LAT, LON));
+}
+function bbox(list){
+  if (!list.length) return { x0:0, y0:0, x1:0, y1:0, w:0, h:0 };
+  let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+  list.forEach(s => {
+    const r = Math.max(SW, SH) / 2 + 6;
+    x0 = Math.min(x0, s.x - r); x1 = Math.max(x1, s.x + r);
+    y0 = Math.min(y0, s.y - r); y1 = Math.max(y1, s.y + r);
+  });
+  return { x0, y0, x1, y1, w: x1 - x0, h: y1 - y0 };
+}
+function inZone(seat, zone){
+  const b = bbox(S.seats);
+  if (!S.seats.length) return true;
+  if (zone === 'front') return seat.y <= b.y0 + Math.max(SH * 1.4, b.h / 3);
+  if (zone === 'back')  return seat.y >= b.y1 - Math.max(SH * 1.4, b.h / 3);
+  if (zone === 'left')  return seat.x <= b.x0 + b.w * 0.42;
+  if (zone === 'right') return seat.x >= b.x1 - b.w * 0.42;
+  return true;
+}
+
+/* ===================== construction de la salle ===================== */
+function freeY(){
+  const b = bbox(S.seats.concat(S.decor.map(d => ({ x: d.x, y: d.y }))));
+  return S.seats.length || S.decor.length ? b.y1 + 46 : 110;
+}
+function addTable(n, rows){
+  push();
+  const g = nid('g');
+  const y0 = freeY(), cx = S.room.w / 2;
+  const totalW = n * (SW + 4) - 4;
+  for (let r = 0; r < rows; r++)
+    for (let c = 0; c < n; c++)
+      S.seats.push({ id: nid('s'), g, rot: 0,
+        x: cx - totalW / 2 + SW / 2 + c * (SW + 4),
+        y: y0 + SH / 2 + r * (SH + 4) });
+  fit(); render();
+}
+function arcPoints(n, spreadDeg, gap){
+  const spread = spreadDeg * Math.PI / 180;
+  const R = Math.max(SW, (n - 1) * (SW + gap) / Math.max(spread, .05));
+  const pts = [];
+  for (let i = 0; i < n; i++){
+    const t = n === 1 ? 0 : (-spread / 2 + spread * i / (n - 1));
+    pts.push({ dx: R * Math.sin(t), dy: R * Math.cos(t) - R, rot: -t * 180 / Math.PI });
+  }
+  return pts; // dy <= 0 : les extrémités remontent vers le tableau
+}
+function addArc(n, spreadDeg, gap, atY){
+  push();
+  const g = nid('g');
+  const pts = arcPoints(n, spreadDeg, gap);
+  const minDy = Math.min(...pts.map(p => p.dy));
+  const y0 = (atY != null ? atY : freeY()) - minDy + SH / 2;
+  const cx = S.room.w / 2;
+  pts.forEach(p => S.seats.push({ id: nid('s'), g, x: cx + p.dx, y: y0 + p.dy, rot: p.rot }));
+  fit(); render();
+}
+function addDecor(txt){
+  push();
+  const wide = /Fenêtre/i.test(txt), piano = /Piano/i.test(txt);
+  S.decor.push({ id: nid('d'), txt, x: 120, y: 90,
+    w: wide ? 300 : (piano ? 170 : 130), h: piano ? 70 : 40, rot: 0 });
+  render();
+}
+function fit(){
+  const all = S.seats.concat(S.decor.map(d => ({ x: d.x, y: d.y })));
+  if (!all.length) return;
+  const b = bbox(S.seats);
+  const dx = S.decor.length ? Math.min(...S.decor.map(d => d.x - d.w / 2)) : 1e9;
+  const dy = S.decor.length ? Math.min(...S.decor.map(d => d.y - d.h / 2)) : 1e9;
+  const x0 = Math.min(b.x0, dx), y0 = Math.min(b.y0, dy);
+  const shiftX = 60 - x0, shiftY = 84 - y0;
+  if (Math.abs(shiftX) > 1 || Math.abs(shiftY) > 1){
+    S.seats.forEach(s => { s.x += shiftX; s.y += shiftY; });
+    S.decor.forEach(d => { d.x += shiftX; d.y += shiftY; });
+  }
+  const nb = bbox(S.seats);
+  const mx = S.decor.length ? Math.max(...S.decor.map(d => d.x + d.w / 2)) : 0;
+  const my = S.decor.length ? Math.max(...S.decor.map(d => d.y + d.h / 2)) : 0;
+  S.room.w = Math.max(900, Math.ceil(Math.max(nb.x1, mx) + 60));
+  S.room.h = Math.max(560, Math.ceil(Math.max(nb.y1, my) + 60));
+}
+function clearRoom(){ S.seats = []; S.decor = []; S.assign = {}; S.pinned.clear(); S.sel.clear(); }
+
+/* ---- modèles calibrés sur un nombre de places ---- */
+/* Une colonne = une file de tables, du tableau vers le fond */
+let rowSpecs = [{ tables: 5, places: 2 }, { tables: 5, places: 2 }, { tables: 5, places: 2 }];
+function rowSpecsFor(N){
+  const paires = Math.floor(N / 2), reste = N % 2;
+  const cols = Math.max(2, Math.min(5, Math.round(Math.sqrt(paires * 1.4))));
+  const base = Math.floor(paires / cols), rem = paires % cols;
+  const specs = [];
+  for (let c = 0; c < cols; c++){
+    const t = base + (c < rem ? 1 : 0);
+    if (t > 0) specs.push({ tables: t, places: 2 });
+  }
+  if (reste) specs.push({ tables: 1, places: 1 });   // une table seule pour l'effectif impair
+  return specs.length ? specs : [{ tables: 1, places: Math.max(1, N) }];
+}
+function buildRowsFrom(specs, replace){
+  const list = specs.filter(s => s.tables > 0 && s.places > 0);
+  if (!list.length) return toast('Ajoute au moins une colonne.', true);
+  push();
+  if (replace){ S.room = { w: 1240, h: 820 }; clearRoom(); }
+  const colW = s => s.places * (SW + 4) - 4;
+  const totalW = list.reduce((a, s) => a + colW(s), 0) + 52 * (list.length - 1);
+  const y0 = replace ? 110 : freeY();
+  let x = 700 - totalW / 2;
+  list.forEach(s => {
+    for (let r = 0; r < s.tables; r++){
+      const g = nid('g');
+      for (let i = 0; i < s.places; i++)
+        S.seats.push({ id: nid('s'), g, rot: 0, x: x + SW / 2 + i * (SW + 4), y: y0 + SH / 2 + r * 96 });
+    }
+    x += colW(s) + 52;
+  });
+  setMode('room'); fit(); render(); zoomFit();
+  toast(`${list.length} colonnes créées, ${list.reduce((a, s) => a + s.tables * s.places, 0)} places.`);
+}
+function renderRowLines(){
+  const box = $('rowLines');
+  box.innerHTML = '';
+  rowSpecs.forEach((sp, i) => {
+    const div = document.createElement('div');
+    div.className = 'iline';
+    div.innerHTML = `<span style="width:66px;flex:none;color:var(--encre-doux)">Colonne ${i + 1}</span>` +
+      `<input type="number" min="0" max="12" value="${sp.tables}" data-f="tables"><span>tables de</span>` +
+      `<input type="number" min="1" max="6" value="${sp.places}" data-f="places"><span>places</span>` +
+      (rowSpecs.length > 1 ? '<button class="x" title="Retirer">×</button>' : '');
+    div.querySelectorAll('input').forEach(inp => inp.addEventListener('input', () => {
+      sp[inp.dataset.f] = Math.max(inp.dataset.f === 'places' ? 1 : 0, +inp.value || 0);
+      box.querySelector('.hint').textContent = totalRows();
+    }));
+    const x = div.querySelector('.x');
+    if (x) x.onclick = () => { rowSpecs.splice(i, 1); $('nbCols').value = rowSpecs.length; renderRowLines(); };
+    box.appendChild(div);
+  });
+  const p = document.createElement('div');
+  p.className = 'hint'; p.style.margin = '0 0 8px';
+  p.textContent = totalRows();
+  box.appendChild(p);
+  $('nbCols').value = rowSpecs.length;
+  const t = rowSpecs.map(s => s.tables);
+  if (t.length && t.every(v => v === t[0])) $('nbRangs').value = t[0];
+}
+function totalRows(){
+  return `Soit ${rowSpecs.reduce((a, s) => a + s.tables * s.places, 0)} places au total.`;
+}
+function islandSpecsFor(N){
+  if (N <= 5) return [{ count: 1, size: Math.max(1, N) }];
+  const full = Math.floor(N / 4), rem = N % 4;
+  let specs;
+  if (rem === 0)      specs = [{ count: full, size: 4 }];
+  else if (rem === 3) specs = [{ count: full, size: 4 }, { count: 1, size: 3 }];
+  else if (rem === 2) specs = [{ count: full - 1, size: 4 }, { count: 2, size: 3 }];
+  else                specs = [{ count: full - 1, size: 4 }, { count: 1, size: 5 }];
+  return specs.filter(s => s.count > 0);
+}
+function arcSpecsFor(N){
+  const k = N <= 14 ? 1 : (N <= 28 ? 2 : 3);
+  const weights = [1, 1.45, 1.85].slice(0, k);
+  const sum = weights.reduce((a, b) => a + b, 0);
+  const sizes = weights.map(w => Math.max(2, Math.round(N * w / sum)));
+  let diff = N - sizes.reduce((a, b) => a + b, 0);
+  for (let i = sizes.length - 1; diff !== 0; i = (i - 1 + sizes.length) % sizes.length){
+    const d = diff > 0 ? 1 : -1;
+    if (sizes[i] + d >= 2){ sizes[i] += d; diff -= d; }
+  }
+  const spreads = [70, 95, 115];
+  return sizes.map((n, i) => ({ n, spread: spreads[i] || 115 }));
+}
+let arcSpecs = [{ n: 10, spread: 70 }, { n: 20, spread: 95 }];
+function buildArcsFrom(specs, replace){
+  if (!specs.length) return toast('Ajoute au moins un arc.', true);
+  push();
+  if (replace){ S.room = { w: 1240, h: 820 }; clearRoom(); }
+  const gap = Math.max(0, +$('aG').value || 0);
+  let y = replace ? 190 : freeY();
+  specs.forEach(s => { addArcRaw(s.n, s.spread, gap, y); y += 150; });
+  setMode('room'); fit(); render(); zoomFit();
+  const tot = specs.reduce((a, s) => a + s.n, 0);
+  toast(`${specs.length} arc${specs.length > 1 ? 's' : ''} créé${specs.length > 1 ? 's' : ''}, ${tot} places.`);
+}
+function renderArcLines(){
+  const box = $('arcLines');
+  box.innerHTML = '';
+  arcSpecs.forEach((sp, i) => {
+    const div = document.createElement('div');
+    div.className = 'iline';
+    div.innerHTML = `<span style="width:42px;flex:none;color:var(--encre-doux)">Arc ${i + 1}</span>` +
+      `<input type="number" min="2" max="40" value="${sp.n}" data-f="n"><span>places</span>` +
+      `<input type="number" min="10" max="330" step="5" value="${sp.spread}" data-f="spread"><span>°</span>` +
+      (arcSpecs.length > 1 ? '<button class="x" title="Retirer">×</button>' : '');
+    div.querySelectorAll('input').forEach(inp => inp.addEventListener('input', () => {
+      sp[inp.dataset.f] = Math.max(inp.dataset.f === 'n' ? 2 : 10, +inp.value || 2);
+      const t = arcSpecs.reduce((a, s) => a + s.n, 0);
+      box.querySelector('.hint').textContent = `Soit ${t} places au total.`;
+    }));
+    const x = div.querySelector('.x');
+    if (x) x.onclick = () => { arcSpecs.splice(i, 1); renderArcLines(); };
+    box.appendChild(div);
+  });
+  const p = document.createElement('div');
+  p.className = 'hint'; p.style.margin = '0 0 8px';
+  p.textContent = `Soit ${arcSpecs.reduce((a, s) => a + s.n, 0)} places au total.`;
+  box.appendChild(p);
+}
+let uSpecs = { bottom: 10, side: 7 };
+function uSpecsFor(N){
+  const side = Math.max(0, Math.min(Math.round((N - 1) / 3.2), Math.floor((N - 1) / 2)));
+  return { bottom: Math.max(1, N - 2 * side), side };
+}
+function buildUFrom(sp, replace){
+  const bottom = Math.max(1, sp.bottom | 0), side = Math.max(0, sp.side | 0);
+  push();
+  if (replace){ S.room = { w: 1240, h: 820 }; clearRoom(); }
+  const g = nid('g');
+  const totalW = bottom * (SW + 4) - 4;
+  const x0 = 700 - totalW / 2 + SW / 2;
+  const Y = (replace ? 150 : freeY()) + side * (SW + 4);
+  for (let i = 0; i < bottom; i++) S.seats.push({ id: nid('s'), g, rot: 0, x: x0 + i * (SW + 4), y: Y });
+  const lx = x0 - SW / 2 - SH / 2 - 6, rx = x0 + totalW - SW / 2 + SH / 2 + 6;
+  for (let i = 0; i < side; i++){
+    const y = Y - SH / 2 - SW / 2 - 6 - i * (SW + 4);
+    S.seats.push({ id: nid('s'), g, rot: 90, x: lx, y });
+    S.seats.push({ id: nid('s'), g, rot: -90, x: rx, y });
+  }
+  setMode('room'); fit(); render(); zoomFit();
+  toast(`${bottom + 2 * side} places créées.`);
+}
+function renderUFields(){
+  $('uBottom').value = uSpecs.bottom;
+  $('uSide').value = uSpecs.side;
+  $('uTotal').textContent = `Soit ${uSpecs.bottom + 2 * uSpecs.side} places au total.`;
+}
+/* Un seul composeur visible à la fois : celui du modèle choisi */
+function setModel(m){
+  S.model = m;
+  document.querySelectorAll('#models .chip').forEach(b => b.classList.toggle('on', b.dataset.model === m));
+  const blocs = { rangees: 'compRangees', ilots: 'compIlots', arcs: 'compArcs', u: 'compU', vide: 'compVide' };
+  Object.entries(blocs).forEach(([k, id]) => { $(id).style.display = (k === m) ? '' : 'none'; });
+}
+function buildModel(name){
+  const N = Math.max(1, Math.min(60, +$('nbSeats').value || 30));
+  setModel(name);
+  push();
+  S.room = { w: 1240, h: 820 };
+  clearRoom();
+  if (name === 'rangees'){ rowSpecs = rowSpecsFor(N); renderRowLines(); buildRowsFrom(rowSpecs, true); return; }
+  else if (name === 'ilots'){ ilotSpecs = islandSpecsFor(N); renderIlotLines(); buildIslands(ilotSpecs, true); return; }
+  else if (name === 'arcs'){ arcSpecs = arcSpecsFor(N); renderArcLines(); buildArcsFrom(arcSpecs, true); return; }
+  else if (name === 'u'){ uSpecs = uSpecsFor(N); renderUFields(); buildUFrom(uSpecs, true); return; }
+  setMode('room');
+  fit(); render(); zoomFit();
+  toast(name === 'vide'
+    ? 'Salle vide : ajoute tes tables au centre ou depuis le panneau de gauche.'
+    : `${S.seats.length} places créées.`);
+}
+function addArcRaw(n, spread, gap, atY){
+  const g = nid('g');
+  const pts = arcPoints(n, spread, gap);
+  const minDy = Math.min(...pts.map(p => p.dy));
+  const y0 = atY - minDy;
+  pts.forEach(p => S.seats.push({ id: nid('s'), g, x: 700 + p.dx, y: y0 + p.dy, rot: p.rot }));
+}
+
+/* ===================== annuler ===================== */
+const undoStack = [];
+function push(){
+  undoStack.push(JSON.stringify({ seats: S.seats, decor: S.decor, assign: S.assign, room: S.room, pinned: [...S.pinned] }));
+  if (undoStack.length > 40) undoStack.shift();
+}
+function undo(){
+  const j = undoStack.pop();
+  if (!j) return toast('Rien à annuler.');
+  const d = JSON.parse(j);
+  S.seats = d.seats; S.decor = d.decor; S.assign = d.assign; S.room = d.room;
+  S.pinned = new Set(d.pinned || []); S.sel.clear();
+  render();
+}
+
+/* ===================== élèves ===================== */
+function parseList(txt){
+  const out = [];
+  txt.split(/\r?\n/).forEach(raw => {
+    let l = raw.trim();
+    if (!l) return;
+    l = l.replace(/^[-•*]\s*/, '').replace(/^\d+\s*[-.)°]\s*/, '').trim();
+    if (!l) return;
+    let parts = l.split(/[\t;,]+/).map(s => s.trim()).filter(Boolean);
+    if (parts.length < 2) parts = l.split(/\s+/);
+    let nom = '', prenom = '';
+    const caps = parts.filter(p => p.length > 1 && p === p.toLocaleUpperCase('fr') && /[A-ZÀ-Ý]/.test(p));
+    if (caps.length && caps.length < parts.length){
+      nom = caps.join(' ');
+      prenom = parts.filter(p => !caps.includes(p)).join(' ');
+    } else if (parts.length >= 2){ nom = parts[0]; prenom = parts.slice(1).join(' '); }
+    else prenom = parts[0];
+    out.push({ id: nid('p'), prenom: tidy(prenom), nom: tidy(nom) });
+  });
+  return out;
+}
+const tidy = s => s.toLocaleLowerCase('fr').replace(/(^|[\s'-])([a-zà-ÿ])/g, (m, a, b) => a + b.toLocaleUpperCase('fr')).trim();
+function label(st){
+  if (!st) return '';
+  if (S.nameStyle === 'prenom') return st.prenom || st.nom;
+  if (S.nameStyle === 'complet') return (st.prenom + ' ' + st.nom.toLocaleUpperCase('fr')).trim();
+  return (st.prenom + (st.nom ? ' ' + st.nom[0].toLocaleUpperCase('fr') + '.' : '')).trim();
+}
+const byId = id => S.students.find(s => s.id === id);
+const seatOfStudent = id => Object.keys(S.assign).find(k => S.assign[k] === id) || null;
+const isAbsent = id => S.constraints.some(c => c.type === 'absent' && c.a === id);
+
+/* ===================== violations ===================== */
+function violations(){
+  const V = [], pos = {};
+  for (const k of Object.keys(S.assign)) pos[S.assign[k]] = k;
+  for (const c of S.constraints){
+    const A = byId(c.a), B = byId(c.b);
+    if (c.type === 'absent'){
+      if (pos[c.a]) V.push({ seats: [pos[c.a]], txt: `${label(A)} est noté absent mais il est placé.` });
+      continue;
+    }
+    if (!A) continue;
+    const ka = pos[c.a], sa = ka && seatById(ka);
+    if (c.type === 'separate' || c.type === 'together'){
+      if (!B) continue;
+      const kb = pos[c.b], sb = kb && seatById(kb);
+      if (!sa || !sb) continue;
+      const adj = neighboursOf(sa).some(s => s.id === kb);
+      if (c.type === 'separate' && adj)
+        V.push({ seats: [ka, kb], link: [ka, kb], txt: `${label(A)} et ${label(B)} sont voisins alors qu'ils doivent être séparés.` });
+      if (c.type === 'together' && !adj)
+        V.push({ seats: [ka, kb], link: [ka, kb], soft: true, txt: `${label(A)} et ${label(B)} devraient être voisins.` });
+    } else if (c.type === 'alone'){
+      if (!sa) continue;
+      const busy = tableMates(sa).filter(s => S.assign[s.id]);
+      if (busy.length)
+        V.push({ seats: [ka, ...busy.map(s => s.id)],
+          txt: `${label(A)} doit être seul à sa table : ${busy.map(s => label(byId(S.assign[s.id]))).join(', ')} ${busy.length > 1 ? 'sont' : 'est'} à côté.` });
+    } else {
+      if (!sa) continue;
+      if (!inZone(sa, c.type)){
+        const w = { front: 'devant', back: 'au fond', left: 'côté gauche', right: 'côté droit' }[c.type];
+        V.push({ seats: [ka], txt: `${label(A)} devrait être placé ${w}.` });
+      }
+    }
+  }
+  const placed = Object.keys(S.assign).length;
+  const toPlace = S.students.filter(s => !isAbsent(s.id)).length;
+  if (toPlace > S.seats.length)
+    V.push({ seats: [], txt: `Il manque ${toPlace - S.seats.length} place(s) : ${toPlace} élèves pour ${S.seats.length} places.` });
+  else if (placed < toPlace)
+    V.push({ seats: [], soft: true, txt: `${toPlace - placed} élève(s) restent sur le banc, en bas de l'écran.` });
+  return V;
+}
+
+/* ===================== placement automatique ===================== */
+function solve(){
+  if (!S.seats.length) return toast('Compose d\'abord ta salle.', true);
+  const toPlace = S.students.filter(s => !isAbsent(s.id));
+  if (!toPlace.length) return toast('Charge d\'abord la liste de la classe.', true);
+
+  const seats = S.seats, idx = {};
+  seats.forEach((s, i) => idx[s.id] = i);
+  const nb  = seats.map(s => neighboursOf(s).map(x => idx[x.id]));
+  const nbT = seats.map(s => tableMates(s).map(x => idx[x.id]));
+  const zn = {};
+  ['front','back','left','right'].forEach(z => zn[z] = seats.map(s => inZone(s, z)));
+
+  const lockedSeat = {}, fixedPos = {};
+  for (const st of toPlace){
+    if (S.pinned.has(st.id)){
+      const k = seatOfStudent(st.id);
+      if (k && idx[k] !== undefined){ lockedSeat[idx[k]] = st.id; fixedPos[st.id] = idx[k]; }
+    }
+  }
+  const free = seats.map((_, i) => i).filter(i => lockedSeat[i] === undefined);
+  const movers = toPlace.filter(s => fixedPos[s.id] === undefined).map(s => s.id);
+  const nSlots = Math.max(free.length, movers.length);
+  const slotSeat = [];
+  for (let i = 0; i < nSlots; i++) slotSeat.push(i < free.length ? free[i] : -1);
+
+  const cons = S.constraints.filter(c => c.type !== 'absent')
+    .filter(c => byId(c.a) && !isAbsent(c.a) && (!c.b || (byId(c.b) && !isAbsent(c.b))));
+
+  let occ = new Set();
+  function cost(pos){
+    let x = 0;
+    for (const c of cons){
+      const pa = pos[c.a];
+      if (pa === undefined) continue;
+      if (c.type === 'separate'){
+        const pb = pos[c.b];
+        if (pb === undefined || pa < 0 || pb < 0) continue;
+        if (nb[pa].includes(pb)) x += 100;
+      } else if (c.type === 'together'){
+        const pb = pos[c.b];
+        if (pb === undefined || pa < 0 || pb < 0){ x += 50; continue; }
+        if (!nb[pa].includes(pb)) x += 55;
+      } else if (c.type === 'alone'){
+        if (pa < 0) continue;
+        for (const n of nbT[pa]) if (occ.has(n)) x += 70;
+      } else {
+        if (pa < 0) continue;
+        if (!zn[c.type][pa]) x += 40;
+      }
+    }
+    for (const id of movers) if (pos[id] < 0) x += 400;
+    return x;
+  }
+
+  let best = null, bestCost = Infinity;
+  for (let R = 0; R < 9; R++){
+    const order = movers.slice();
+    for (let i = order.length - 1; i > 0; i--){ const j = (Math.random() * (i + 1)) | 0; [order[i], order[j]] = [order[j], order[i]]; }
+    const slot = new Array(nSlots).fill(null);
+    order.forEach((id, i) => { if (i < nSlots) slot[i] = id; });
+    const pos = Object.assign({}, fixedPos);
+    const rebuild = () => {
+      occ = new Set(Object.values(fixedPos).filter(v => v >= 0));
+      slot.forEach((id, i) => { if (id){ pos[id] = slotSeat[i]; if (slotSeat[i] >= 0) occ.add(slotSeat[i]); } });
+    };
+    rebuild();
+    let cur = cost(pos);
+    const iters = 5200;
+    for (let it = 0; it < iters; it++){
+      const T = 3.2 * Math.pow(0.0009, it / iters);
+      const i = (Math.random() * nSlots) | 0, j = (Math.random() * nSlots) | 0;
+      if (i === j) continue;
+      [slot[i], slot[j]] = [slot[j], slot[i]];
+      rebuild();
+      const nc = cost(pos), d = nc - cur;
+      if (d <= 0 || Math.random() < Math.exp(-d / T)) cur = nc;
+      else { [slot[i], slot[j]] = [slot[j], slot[i]]; rebuild(); }
+      if (cur === 0) break;
+    }
+    rebuild(); cur = cost(pos);
+    if (cur < bestCost){ bestCost = cur; best = slot.slice(); }
+    if (!bestCost) break;
+  }
+  const keep = {};
+  for (const id of Object.keys(fixedPos)) keep[seats[fixedPos[id]].id] = id;
+  best.forEach((id, i) => { if (id && slotSeat[i] >= 0) keep[seats[slotSeat[i]].id] = id; });
+  S.assign = keep;
+  render();
+  const v = violations().filter(x => !x.soft);
+  toast(v.length ? `Plan généré, ${v.length} contrainte(s) impossible(s) à satisfaire.`
+                 : 'Plan généré : toutes les contraintes sont respectées.', v.length > 0);
+}
+
+/* ===================== rendu ===================== */
+const esc = s => String(s).replace(/[&<>"]/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[m]));
+/* Vue depuis le bureau : le plan pivote d'un demi-tour, tableau en bas de la page */
+const vx = x => S.teacherView ? S.room.w - x : x;
+const vy = y => S.teacherView ? S.room.h - y : y;
+const vr = r => S.teacherView ? r + 180 : r;
+
+function render(){
+  const cv = $('canvas');
+  cv.style.width = S.room.w + 'px';
+  cv.style.height = S.room.h + 'px';
+  cv.classList.toggle('room-mode', S.mode === 'room');
+  const bd = cv.querySelector('.board');
+  bd.style.top = S.teacherView ? 'auto' : '14px';
+  bd.style.bottom = S.teacherView ? '14px' : 'auto';
+  $('wrap').style.transform = `scale(${S.zoom})`;
+  $('wrap').style.width = (S.room.w * S.zoom) + 'px';
+  $('wrap').style.height = (S.room.h * S.zoom) + 'px';
+  $('viewport').scrollLeft = $('viewport').scrollLeft;
+  cv.querySelectorAll('.seat,.decor,.emptystate').forEach(n => n.remove());
+
+  if (!S.seats.length && !S.decor.length){
+    const es = document.createElement('div');
+    es.className = 'emptystate';
+    es.innerHTML = `<h4>Salle vide</h4><p>Ajoute tes tables une à une, ou compose des îlots dans le panneau de gauche. ` +
+      `Chaque table se déplace ensuite librement.</p><div class="es-row"></div>`;
+    const row = es.querySelector('.es-row');
+    [['Une table simple', () => addTable(1, 1)],
+     ['Une table double', () => addTable(2, 1)],
+     ['Un îlot de 4', () => addTable(2, 2)],
+     ['Un arc de 10', () => addArc(10, 70, 6)]].forEach(([t, fn]) => {
+      const b = document.createElement('button');
+      b.className = 'btn small'; b.textContent = t;
+      b.onclick = ev => { ev.stopPropagation(); fn(); };
+      row.appendChild(b);
+    });
+    cv.appendChild(es);
+  }
+
+  const V = violations();
+  const bad = new Set();
+  V.forEach(v => { if (!v.soft) (v.seats || []).forEach(s => bad.add(s)); });
+
+  S.decor.forEach(d => {
+    const el = document.createElement('div');
+    el.className = 'decor' + (S.sel.has(d.id) ? ' selected' : '');
+    el.dataset.id = d.id;
+    el.style.cssText = `width:${d.w}px;height:${d.h}px;left:${vx(d.x)}px;top:${vy(d.y)}px;` +
+      `transform:translate(-50%,-50%) rotate(${vr(d.rot)}deg)`;
+    el.textContent = d.txt;
+    cv.appendChild(el);
+  });
+
+  S.seats.forEach(s => {
+    const el = document.createElement('div');
+    const sid = S.assign[s.id];
+    const st = byId(sid);
+    let cls = 'seat';
+    if (st) cls += ' occupied'; else cls += ' free';
+    if (S.sel.has(s.id)) cls += ' selected';
+    if (S.selStudent && S.selStudent === sid) cls += ' selected';
+    if (bad.has(s.id)) cls += ' conflict';
+    el.className = cls;
+    el.dataset.id = s.id;
+    el.draggable = S.mode === 'plan' && !!st;
+    const rot = vr(s.rot);
+    el.style.cssText = `width:${SW}px;height:${SH}px;left:${vx(s.x)}px;top:${vy(s.y)}px;` +
+      `transform:translate(-50%,-50%) rotate(${rot}deg)`;
+    const a = ((rot % 360) + 360) % 360;
+    const flip = (a > 90 && a < 270) ? 180 : 0;   // le nom reste toujours lisible
+    el.innerHTML = `<span class="nm" style="transform:rotate(${flip}deg)">${esc(st ? label(st) : 'libre')}</span>`;
+    const marks = [];
+    if (sid && S.pinned.has(sid)) marks.push('📌');
+    if (bad.has(s.id)) marks.push('<span class="warn">!</span>');
+    if (marks.length) el.innerHTML += `<span class="mark">${marks.join('')}</span>`;
+    cv.appendChild(el);
+  });
+
+  drawLinks(V);
+  renderPool();
+  renderAlerts(V);
+  renderCtx();
+  $('seatCount').textContent = S.seats.length + ' places';
+  const eleves = S.students.length || S.classSize || 0;
+  const p = S.seats.length;
+  let txt = p ? `${p} place${p > 1 ? 's' : ''} dans la salle` : 'Aucune place pour le moment';
+  if (eleves){
+    const d = p - eleves;
+    txt += ` pour ${eleves} élèves — ` + (d === 0 ? 'le compte est juste'
+      : d > 0 ? `${d} place${d > 1 ? 's' : ''} libre${d > 1 ? 's' : ''}`
+              : `il manque ${-d} place${-d > 1 ? 's' : ''}`);
+  }
+  const st = $('roomStatus');
+  st.textContent = txt;
+  st.style.color = (eleves && p < eleves) ? 'var(--rouge)' : '';
+  $('stuCount').textContent = S.students.length;
+  $('conCount').textContent = S.constraints.length;
+  $('zLabel').textContent = Math.round(S.zoom * 100) + ' %';
+  $('tip').textContent = S.mode === 'room'
+    ? 'Une place se déplace seule et s\'aimante aux autres. Double-clic : toute la table. Maj+clic : plusieurs. Alt : sans aimant.'
+    : 'Glisse un élève d\'une place à l\'autre, ou clique deux places pour les échanger.';
+  const cn = $('className').value.trim();
+  $('printTitle').textContent = cn ? 'Plan de classe — ' + cn : 'Plan de classe';
+  $('printDate').textContent = new Date().toLocaleDateString('fr-FR');
+}
+
+function drawLinks(V){
+  const svg = $('links');
+  svg.setAttribute('viewBox', `0 0 ${S.room.w} ${S.room.h}`);
+  svg.style.width = S.room.w + 'px'; svg.style.height = S.room.h + 'px';
+  let out = '';
+  if (S.mode === 'room' && S.showLinks){
+    const seen = new Set();
+    S.seats.forEach(a => neighboursOf(a).forEach(b => {
+      const k = [a.id, b.id].sort().join('|');
+      if (seen.has(k)) return; seen.add(k);
+      out += `<line x1="${vx(a.x)}" y1="${vy(a.y)}" x2="${vx(b.x)}" y2="${vy(b.y)}" stroke="#8A7351" stroke-opacity=".35" stroke-width="2"/>`;
+    }));
+  }
+  V.forEach(v => {
+    if (!v.link) return;
+    const a = seatById(v.link[0]), b = seatById(v.link[1]);
+    if (!a || !b) return;
+    const x1 = vx(a.x), y1 = vy(a.y), x2 = vx(b.x), y2 = vy(b.y);
+    const mx = (x1 + x2) / 2, my = (y1 + y2) / 2 - Math.abs(x2 - x1) * .16 - 16;
+    out += `<path d="M${x1},${y1} Q${mx},${my} ${x2},${y2}" fill="none" stroke="${v.soft ? '#2F6B4F' : '#A3261E'}"` +
+           ` stroke-width="2.5" stroke-dasharray="${v.soft ? '2 6' : '7 5'}"/>`;
+  });
+  svg.innerHTML = out;
+}
+
+function renderPool(){
+  const pool = $('pool');
+  const seated = new Set(Object.values(S.assign));
+  const rest = S.students.filter(s => !seated.has(s.id));
+  if (!rest.length){ pool.innerHTML = '<span class="empty" style="margin:0">Tous les élèves sont placés.</span>'; return; }
+  pool.innerHTML = '';
+  rest.forEach(st => {
+    const t = document.createElement('div');
+    const abs = isAbsent(st.id);
+    t.className = 'tag' + (abs ? ' absent' : '') + (S.selStudent === st.id ? ' selected' : '');
+    t.textContent = label(st) + (abs ? ' (absent)' : '');
+    t.draggable = !abs;
+    t.dataset.sid = st.id;
+    pool.appendChild(t);
+  });
+}
+function renderAlerts(V){
+  const hard = V.filter(v => !v.soft), soft = V.filter(v => v.soft);
+  $('alertList').innerHTML = [...hard, ...soft]
+    .map(v => `<li>${v.soft ? '· ' : '<b>⚠</b> '}${esc(v.txt)}</li>`).join('');
+  $('alertDot').className = 'dot' + (hard.length ? ' bad' : '');
+  $('alertTitle').textContent = hard.length
+    ? `${hard.length} conflit${hard.length > 1 ? 's' : ''}${soft.length ? ` · ${soft.length} remarque${soft.length > 1 ? 's' : ''}` : ''}`
+    : (soft.length ? `${soft.length} remarque${soft.length > 1 ? 's' : ''}` : 'Aucun conflit');
+}
+function renderCtx(){
+  const box = $('ctxTools');
+  box.innerHTML = '';
+  const mk = (txt, fn, cls) => { const b = document.createElement('button');
+    b.className = 'btn small' + (cls ? ' ' + cls : ''); b.textContent = txt; b.onclick = fn; box.appendChild(b); return b; };
+
+  if (S.mode === 'room'){
+    const n = S.sel.size;
+    if (!n){ const s = document.createElement('span'); s.className = 'tinfo';
+      s.textContent = 'Aucune table sélectionnée'; box.appendChild(s);
+      mk('Annuler la dernière action', undo); return; }
+    const s = document.createElement('span'); s.className = 'tinfo';
+    s.textContent = (n === 1 ? '1 place —' : n + ' éléments —'); box.appendChild(s);
+    mk('Table entière', expandToTables);
+    mk('↺ 5°', () => rotateSel(-5));
+    mk('↻ 5°', () => rotateSel(5));
+    mk('↻ 90°', () => rotateSel(90));
+    mk('Dupliquer', duplicateSel);
+    mk('Supprimer', deleteSel, 'danger');
+    mk('Annuler', undo);
+    return;
+  }
+  if (!S.selStudent){
+    const s = document.createElement('span'); s.className = 'tinfo';
+    s.textContent = 'Aucun élève sélectionné'; box.appendChild(s); return;
+  }
+  const st = byId(S.selStudent);
+  if (!st){ S.selStudent = null; return; }
+  const s = document.createElement('span'); s.innerHTML = `<b>${esc(label(st))}</b> —`; box.appendChild(s);
+  mk(S.pinned.has(st.id) ? 'Détacher' : 'Épingler', () => {
+    S.pinned.has(st.id) ? S.pinned.delete(st.id) : S.pinned.add(st.id); render(); });
+  mk('Retirer du plan', () => { const k = seatOfStudent(st.id); if (k) delete S.assign[k]; S.selStudent = null; render(); });
+  mk('Désélectionner', () => { S.selStudent = null; render(); });
+}
+
+/* ===================== zoom ===================== */
+function setZoom(z){ S.zoom = Math.min(2, Math.max(.25, z)); render(); }
+function zoomFit(){
+  const vp = $('viewport');
+  const z = Math.min((vp.clientWidth - 44) / S.room.w, (vp.clientHeight - 44) / S.room.h, 1.4);
+  setZoom(Math.max(.25, z));
+}
+$('zIn').onclick = () => setZoom(S.zoom * 1.15);
+$('zOut').onclick = () => setZoom(S.zoom / 1.15);
+$('zFit').onclick = zoomFit;
+
+/* ===================== édition de la salle ===================== */
+function selectionItems(){
+  return [...S.sel].map(id => seatById(id) || S.decor.find(d => d.id === id)).filter(Boolean);
+}
+function rotateSel(deg){
+  push();
+  const items = selectionItems();
+  if (!items.length) return;
+  const cx = items.reduce((a, i) => a + i.x, 0) / items.length;
+  const cy = items.reduce((a, i) => a + i.y, 0) / items.length;
+  const a = deg * Math.PI / 180, ca = Math.cos(a), sa = Math.sin(a);
+  items.forEach(i => {
+    const dx = i.x - cx, dy = i.y - cy;
+    i.x = cx + dx * ca - dy * sa;
+    i.y = cy + dx * sa + dy * ca;
+    i.rot = (i.rot + deg) % 360;
+  });
+  fit(); render();
+}
+/* Étend la sélection aux places collées : la « table entière » se déduit de la disposition réelle */
+function expandToTables(){
+  const seen = new Set(S.sel);
+  const queue = [...S.sel].map(seatById).filter(Boolean);
+  while (queue.length){
+    const s = queue.pop();
+    tableMates(s).forEach(m => { if (!seen.has(m.id)){ seen.add(m.id); queue.push(m); } });
+  }
+  S.sel = seen; render();
+}
+
+/* Positions d'accroche : la place vient se coller au bord d'une autre, dans son orientation */
+function snapSeat(seat, others){
+  const R = (x, y, deg) => { const a = deg * Math.PI / 180;
+    return { x: x * Math.cos(a) - y * Math.sin(a), y: x * Math.sin(a) + y * Math.cos(a) }; };
+  let best = null, bestD = 20;
+  for (const o of others){
+    for (const [dx, dy] of [[SW + 4, 0], [-(SW + 4), 0], [0, SH + 4], [0, -(SH + 4)]]){
+      const v = R(dx, dy, o.rot);
+      const cx = o.x + v.x, cy = o.y + v.y;
+      const dd = Math.hypot(seat.x - cx, seat.y - cy);
+      if (dd >= bestD) continue;
+      if (others.some(s => Math.hypot(s.x - cx, s.y - cy) < 45)) continue; // place déjà prise
+      bestD = dd; best = { x: cx, y: cy, rot: o.rot };
+    }
+  }
+  if (best){ seat.x = best.x; seat.y = best.y; seat.rot = best.rot; return true; }
+  return false;
+}
+
+/* Forme d'un îlot : une seule rangée jusqu'à 3 places, deux rangs au-delà */
+function islandShape(n){
+  return n <= 3 ? { cols: n, rows: 1 } : { cols: Math.ceil(n / 2), rows: 2 };
+}
+function buildIslands(specs, replace){
+  push();
+  if (replace) clearRoom();
+  const list = [];
+  specs.forEach(s => { for (let i = 0; i < s.count; i++) list.push(s.size); });
+  if (!list.length) return toast('Indique au moins un îlot.', true);
+  list.sort((a, b) => b - a);
+  const GX = 88, GY = 104, MAXW = 1280;
+  const rows = [];
+  let cur = [], curW = 0;
+  list.forEach(n => {
+    const sh = islandShape(n), w = sh.cols * (SW + 4) - 4;
+    if (cur.length && curW + GX + w > MAXW){ rows.push(cur); cur = []; curW = 0; }
+    cur.push({ n, sh, w });
+    curW += (cur.length > 1 ? GX : 0) + w;
+  });
+  if (cur.length) rows.push(cur);
+
+  let y = replace ? 110 : freeY();
+  rows.forEach(row => {
+    const totalW = row.reduce((a, b) => a + b.w, 0) + GX * (row.length - 1);
+    let x = 700 - totalW / 2, maxRows = 1;
+    row.forEach(it => {
+      const g = nid('g');
+      let placed = 0;
+      for (let r = 0; r < it.sh.rows; r++)
+        for (let c = 0; c < it.sh.cols && placed < it.n; c++, placed++)
+          S.seats.push({ id: nid('s'), g, rot: 0, x: x + SW / 2 + c * (SW + 4), y: y + SH / 2 + r * (SH + 4) });
+      maxRows = Math.max(maxRows, it.sh.rows);
+      x += it.w + GX;
+    });
+    y += maxRows * (SH + 4) + GY;
+  });
+  setMode('room'); fit(); render(); zoomFit();
+  toast(`${list.length} îlots créés, ${list.reduce((a, b) => a + b, 0)} places.`);
+}
+
+let ilotSpecs = [{ count: 4, size: 4 }, { count: 3, size: 3 }];
+function renderIlotLines(){
+  const box = $('ilotLines');
+  box.innerHTML = '';
+  ilotSpecs.forEach((sp, i) => {
+    const div = document.createElement('div');
+    div.className = 'iline';
+    div.innerHTML = `<input type="number" min="1" max="20" value="${sp.count}" data-f="count">` +
+      `<span>îlots de</span><input type="number" min="1" max="10" value="${sp.size}" data-f="size">` +
+      `<span>places</span>${ilotSpecs.length > 1 ? '<button class="x" title="Retirer">×</button>' : ''}`;
+    div.querySelectorAll('input').forEach(inp => inp.addEventListener('input', () => {
+      sp[inp.dataset.f] = Math.max(1, +inp.value || 1);
+      const t = ilotSpecs.reduce((a, s) => a + s.count * s.size, 0);
+      box.querySelector('.hint').textContent = `Soit ${t} places au total.`;
+    }));
+    const x = div.querySelector('.x');
+    if (x) x.onclick = () => { ilotSpecs.splice(i, 1); renderIlotLines(); };
+    box.appendChild(div);
+  });
+  const total = ilotSpecs.reduce((a, s) => a + s.count * s.size, 0);
+  const p = document.createElement('div');
+  p.className = 'hint';
+  p.style.margin = '0 0 8px';
+  p.textContent = `Soit ${total} places au total.`;
+  box.appendChild(p);
+}
+function setMode(m){
+  S.mode = m;
+  [...$('modeswitch').children].forEach(x => x.setAttribute('aria-pressed', x.dataset.mode === m));
+  S.sel.clear(); S.selStudent = null;
+}
+
+function duplicateSel(){
+  push();
+  const items = selectionItems();
+  const map = {}, newSel = new Set();
+  items.forEach(i => {
+    const copy = Object.assign({}, i);
+    copy.id = nid(seatById(i.id) ? 's' : 'd');
+    copy.x += 40; copy.y += 40;
+    if (copy.g){ map[i.g] = map[i.g] || nid('g'); copy.g = map[i.g]; }
+    (seatById(i.id) ? S.seats : S.decor).push(copy);
+    newSel.add(copy.id);
+  });
+  S.sel = newSel; fit(); render();
+}
+function deleteSel(){
+  push();
+  S.sel.forEach(id => { delete S.assign[id]; });
+  S.seats = S.seats.filter(s => !S.sel.has(s.id));
+  S.decor = S.decor.filter(d => !S.sel.has(d.id));
+  S.sel.clear(); fit(); render();
+}
+
+const cv = $('canvas');
+let drag = null;
+cv.addEventListener('pointerdown', e => {
+  if (S.mode !== 'room' || e.target.closest('.emptystate')) return;
+  const el = e.target.closest('.seat,.decor');
+  const rect = cv.getBoundingClientRect();
+  const px = (e.clientX - rect.left) / S.zoom, py = (e.clientY - rect.top) / S.zoom;
+  if (el){
+    const id = el.dataset.id;
+    if (!S.sel.has(id)){
+      if (!e.shiftKey) S.sel.clear();
+      S.sel.add(id);
+    } else if (e.shiftKey){
+      S.sel.delete(id);
+    }
+    push();
+    drag = { mode: 'move', px, py, items: selectionItems().map(i => ({ i, x: i.x, y: i.y })) };
+    render();
+  } else {
+    if (!e.shiftKey) S.sel.clear();
+    drag = { mode: 'marquee', px, py, x0: px, y0: py };
+    render();
+  }
+  cv.setPointerCapture(e.pointerId);
+  e.preventDefault();
+});
+cv.addEventListener('pointermove', e => {
+  if (!drag) return;
+  const rect = cv.getBoundingClientRect();
+  const px = (e.clientX - rect.left) / S.zoom, py = (e.clientY - rect.top) / S.zoom;
+  if (drag.mode === 'move'){
+    let dx = px - drag.px, dy = py - drag.py;
+    if (!e.altKey){ dx = Math.round(dx / 2) * 2; dy = Math.round(dy / 2) * 2; }
+    const sg = S.teacherView ? -1 : 1;
+    drag.items.forEach(o => { o.i.x = o.x + dx * sg; o.i.y = o.y + dy * sg; });
+    drag.snapped = false;
+    if (!e.altKey && drag.items.length === 1){
+      const it = drag.items[0].i;
+      if (seatById(it.id)){
+        if (drag.rot0 === undefined) drag.rot0 = it.rot;
+        it.rot = drag.rot0;
+        drag.snapped = snapSeat(it, S.seats.filter(s => s !== it));
+      }
+    }
+    render();
+  } else {
+    drag.px = px; drag.py = py;
+    let m = document.querySelector('.marquee');
+    if (!m){ m = document.createElement('div'); m.className = 'marquee'; cv.appendChild(m); }
+    const x = Math.min(drag.x0, px), y = Math.min(drag.y0, py);
+    m.style.cssText = `left:${x}px;top:${y}px;width:${Math.abs(px - drag.x0)}px;height:${Math.abs(py - drag.y0)}px`;
+  }
+});
+cv.addEventListener('pointerup', e => {
+  if (!drag) return;
+  if (drag.mode === 'marquee'){
+    const x0 = Math.min(drag.x0, drag.px), x1 = Math.max(drag.x0, drag.px);
+    const y0 = Math.min(drag.y0, drag.py), y1 = Math.max(drag.y0, drag.py);
+    if (x1 - x0 > 6 && y1 - y0 > 6){
+      S.seats.forEach(s => { const X = vx(s.x), Y = vy(s.y);
+        if (X >= x0 && X <= x1 && Y >= y0 && Y <= y1) S.sel.add(s.id); });
+      S.decor.forEach(d => { const X = vx(d.x), Y = vy(d.y);
+        if (X >= x0 && X <= x1 && Y >= y0 && Y <= y1) S.sel.add(d.id); });
+    }
+    document.querySelector('.marquee')?.remove();
+  } else fit();
+  drag = null;
+  render();
+});
+cv.addEventListener('dblclick', e => {
+  if (S.mode !== 'room') return;
+  const seatEl = e.target.closest('.seat');
+  if (seatEl){ S.sel.clear(); S.sel.add(seatEl.dataset.id); expandToTables(); return; }
+  const el = e.target.closest('.decor');
+  if (!el) return;
+  const d = S.decor.find(x => x.id === el.dataset.id);
+  const t = prompt('Texte du repère :', d.txt);
+  if (t !== null){ push(); d.txt = t.trim() || d.txt; render(); }
+});
+document.addEventListener('keydown', e => {
+  if (/input|textarea|select/i.test(e.target.tagName)) return;
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z'){ e.preventDefault(); return undo(); }
+  if (S.mode !== 'room' || !S.sel.size) return;
+  const step = e.shiftKey ? 20 : 4;
+  const map = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] };
+  if (map[e.key]){
+    e.preventDefault();
+    const [dx, dy] = map[e.key];
+    const sg = S.teacherView ? -1 : 1;
+    selectionItems().forEach(i => { i.x += dx * sg; i.y += dy * sg; });
+    render();
+  }
+  if (e.key === 'Delete' || e.key === 'Backspace'){ e.preventDefault(); deleteSel(); }
+});
+
+/* ===================== déplacement des élèves ===================== */
+function before(){ return violations().filter(v => !v.soft).map(v => v.txt); }
+function announce(prev){
+  const now = violations().filter(v => !v.soft).map(v => v.txt);
+  const added = now.filter(t => !prev.includes(t));
+  const fixed = prev.filter(t => !now.includes(t));
+  if (added.length) toast('⚠ ' + added[0] + (added.length > 1 ? ` (+${added.length - 1} autre)` : ''), true);
+  else if (fixed.length) toast('Conflit résolu : ' + fixed[0]);
+}
+function place(sid, seatId){
+  const prev = before();
+  const from = seatOfStudent(sid), other = S.assign[seatId];
+  if (from) delete S.assign[from];
+  if (other){ if (from) S.assign[from] = other; else delete S.assign[seatId]; }
+  S.assign[seatId] = sid;
+  S.selStudent = null;
+  render(); announce(prev);
+}
+function unseat(sid){
+  const prev = before();
+  const k = seatOfStudent(sid);
+  if (k) delete S.assign[k];
+  S.selStudent = null;
+  render(); announce(prev);
+}
+let dragId = null;
+document.addEventListener('dragstart', e => {
+  if (S.mode !== 'plan') return;
+  const el = e.target.closest('.seat.occupied, .tag');
+  if (!el) return;
+  dragId = el.dataset.sid || S.assign[el.dataset.id];
+  if (!dragId) return;
+  e.dataTransfer.effectAllowed = 'move';
+  try { e.dataTransfer.setData('text/plain', dragId); } catch(err){}
+  el.classList.add('dragging');
+});
+document.addEventListener('dragend', () => {
+  document.querySelectorAll('.dragging,.target').forEach(x => x.classList.remove('dragging', 'target'));
+  dragId = null;
+});
+document.addEventListener('dragover', e => {
+  const t = e.target.closest('.seat') || e.target.closest('.pool');
+  if (t && dragId){
+    e.preventDefault(); e.dataTransfer.dropEffect = 'move';
+    document.querySelectorAll('.target').forEach(x => x.classList.remove('target'));
+    t.classList.add('target');
+  }
+});
+document.addEventListener('drop', e => {
+  if (!dragId) return;
+  const seat = e.target.closest('.seat'), pool = e.target.closest('.pool');
+  e.preventDefault();
+  if (seat) place(dragId, seat.dataset.id);
+  else if (pool) unseat(dragId);
+  dragId = null;
+});
+cv.addEventListener('click', e => {
+  if (S.mode !== 'plan') return;
+  const el = e.target.closest('.seat');
+  if (!el) return;
+  const here = S.assign[el.dataset.id];
+  if (S.selStudent){
+    if (S.selStudent === here){ S.selStudent = null; render(); return; }
+    place(S.selStudent, el.dataset.id); return;
+  }
+  if (here){ S.selStudent = here; render(); }
+});
+$('pool').addEventListener('click', e => {
+  const t = e.target.closest('.tag');
+  if (!t || t.classList.contains('absent')) return;
+  S.selStudent = t.dataset.sid;
+  toast('Clique maintenant sur une place pour installer ' + label(byId(S.selStudent)) + '.');
+  render();
+});
+
+/* ===================== contraintes ===================== */
+const needsB = t => t === 'separate' || t === 'together';
+function fillSelects(){
+  const opts = S.students.map(s => `<option value="${s.id}">${esc(label(s))}</option>`).join('');
+  $('cA').innerHTML = opts; $('cB').innerHTML = opts;
+}
+function typeLabel(c){
+  const A = label(byId(c.a)), B = label(byId(c.b));
+  return { separate:`${A} et ${B} — jamais voisins`, together:`${A} et ${B} — voisins`,
+    alone:`${A} — seul à sa table`, front:`${A} — devant`, back:`${A} — au fond`,
+    left:`${A} — côté gauche`, right:`${A} — côté droit`, absent:`${A} — absent` }[c.type] || '';
+}
+const typeClass = t => ({ separate:'sep', together:'tog', alone:'solo', absent:'absent' }[t] || 'zone');
+function renderConstraints(){
+  const ul = $('clist'); ul.innerHTML = '';
+  S.constraints.forEach(c => {
+    const li = document.createElement('li');
+    li.className = typeClass(c.type);
+    li.innerHTML = `<span>${esc(typeLabel(c))}</span><button class="x" title="Supprimer">×</button>`;
+    li.querySelector('.x').onclick = () => {
+      S.constraints = S.constraints.filter(x => x.id !== c.id); renderConstraints(); render(); };
+    ul.appendChild(li);
+  });
+  $('cEmpty').style.display = S.constraints.length ? 'none' : 'block';
+  $('conCount').textContent = S.constraints.length;
+}
+$('cType').addEventListener('change', e => { $('wrapB').style.display = needsB(e.target.value) ? 'block' : 'none'; });
+$('btnAddC').addEventListener('click', () => {
+  const t = $('cType').value, a = $('cA').value, b = $('cB').value;
+  if (!a) return toast('Charge d\'abord la liste de la classe.', true);
+  if (needsB(t)){
+    if (!b || a === b) return toast('Choisis deux élèves différents.', true);
+    if (S.constraints.some(c => c.type === t && ((c.a === a && c.b === b) || (c.a === b && c.b === a))))
+      return toast('Cette contrainte existe déjà.', true);
+  } else if (S.constraints.some(c => c.type === t && c.a === a)) return toast('Cette contrainte existe déjà.', true);
+  S.constraints.push({ id: nid('c'), type: t, a, b: needsB(t) ? b : null });
+  if (t === 'absent'){ const k = seatOfStudent(a); if (k) delete S.assign[k]; }
+  renderConstraints(); render();
+});
+
+/* ===================== divers ===================== */
+let tt = null;
+function toast(msg, warn){
+  const el = $('toast');
+  el.textContent = msg;
+  el.className = 'toast show' + (warn ? ' warn' : '');
+  clearTimeout(tt); tt = setTimeout(() => el.className = 'toast', 4200);
+}
+$('btnLoadStudents').addEventListener('click', () => {
+  const list = parseList($('paste').value);
+  if (!list.length) return toast('Aucun élève reconnu dans la liste.', true);
+  S.students = list; S.assign = {}; S.pinned.clear(); S.constraints = []; S.selStudent = null;
+  S.classSize = list.length; $('nbStudents').value = list.length;
+  fillSelects(); renderConstraints(); render();
+  $('loadNote').textContent = `${list.length} élèves chargés. Les contraintes précédentes ont été effacées.`;
+  toast(`${list.length} élèves chargés.`);
+});
+$('nameStyle').addEventListener('change', e => { S.nameStyle = e.target.value; fillSelects(); renderConstraints(); render(); });
+$('models').addEventListener('click', e => { const b = e.target.closest('[data-model]'); if (b) buildModel(b.dataset.model); });
+$('nbStudents').addEventListener('input', e => { S.classSize = +e.target.value || 0; render(); });
+$('nbSeats').addEventListener('input', render);
+$('uBottom').addEventListener('input', e => { uSpecs.bottom = Math.max(1, +e.target.value || 1); renderUFields(); });
+$('uSide').addEventListener('input', e => { uSpecs.side = Math.max(0, +e.target.value || 0); renderUFields(); });
+$('btnU').addEventListener('click', () => buildUFrom(uSpecs, true));
+$('btnUAdd').addEventListener('click', () => buildUFrom(uSpecs, false));
+$('btnAddCol').addEventListener('click', () => {
+  rowSpecs.push({ tables: Math.max(1, +$('nbRangs').value || 5), places: 2 }); renderRowLines(); });
+$('nbCols').addEventListener('input', e => {
+  const n = Math.max(1, Math.min(8, +e.target.value || 1));
+  const t = Math.max(1, +$('nbRangs').value || 5);
+  while (rowSpecs.length < n) rowSpecs.push({ tables: t, places: 2 });
+  rowSpecs.length = n;
+  renderRowLines();
+});
+$('nbRangs').addEventListener('input', e => {
+  const t = Math.max(0, Math.min(10, +e.target.value || 0));
+  rowSpecs.forEach(s => s.tables = t);
+  renderRowLines();
+});
+$('btnRows').addEventListener('click', () => buildRowsFrom(rowSpecs, true));
+$('btnRowsAdd').addEventListener('click', () => buildRowsFrom(rowSpecs, false));
+$('btnAddLine').addEventListener('click', () => { ilotSpecs.push({ count: 2, size: 4 }); renderIlotLines(); });
+$('btnIlots').addEventListener('click', () => buildIslands(ilotSpecs, true));
+$('btnIlotsAdd').addEventListener('click', () => buildIslands(ilotSpecs, false));
+$('decorBtns').addEventListener('click', e => { const b = e.target.closest('[data-decor]'); if (b) addDecor(b.dataset.decor); });
+$('btnAddTable').addEventListener('click', () => { setMode('room'); addTable(+$('tN').value || 2, +$('tR').value || 1); });
+$('btnAddArcLine').addEventListener('click', () => { arcSpecs.push({ n: 12, spread: 95 }); renderArcLines(); });
+$('btnArcs').addEventListener('click', () => buildArcsFrom(arcSpecs, true));
+$('btnArcsAdd').addEventListener('click', () => buildArcsFrom(arcSpecs, false));
+$('viewTeacher').addEventListener('change', e => { S.teacherView = e.target.checked; render(); });
+$('fitPrint').addEventListener('change', e => { S.fitPrint = e.target.checked; render(); });
+$('showLinks').addEventListener('change', e => { S.showLinks = e.target.checked; render(); });
+$('wideNeighbour').addEventListener('change', e => { S.wide = e.target.checked; render(); });
+$('modeswitch').addEventListener('click', e => {
+  const b = e.target.closest('[data-mode]'); if (!b) return;
+  S.mode = b.dataset.mode; S.sel.clear(); S.selStudent = null;
+  [...e.currentTarget.children].forEach(x => x.setAttribute('aria-pressed', x === b));
+  render();
+});
+$('btnSolve').addEventListener('click', solve);
+$('className').addEventListener('input', render);
+$('btnPrint').addEventListener('click', () => window.print());
+/* A4 paysage, marges de 10 mm : 277 x 190 mm, soit 1047 x 718 px à 96 ppp,
+   moins le bandeau de titre. */
+const A4W = 1040, A4H = 672;
+let printState = null;
+function printScale(){ return Math.min(A4W / S.room.w, A4H / S.room.h, 1.6); }
+window.addEventListener('beforeprint', () => {
+  if (!S.fitPrint) return;
+  const k = printScale();
+  printState = { zoom: S.zoom, names: S.nameStyle };
+  S.zoom = k;
+  // viser environ 10 px de texte sur le papier, sans déborder de la table
+  const f = Math.min(21, Math.max(13, 10 / k));
+  if (f > 13) document.documentElement.style.setProperty('--sf', f.toFixed(1) + 'px');
+  if (f > 20) S.nameStyle = 'prenom';
+  else if (f > 15 && S.nameStyle === 'complet') S.nameStyle = 'prenomN';
+  render();
+});
+window.addEventListener('afterprint', () => {
+  if (!printState) return;
+  S.zoom = printState.zoom; S.nameStyle = printState.names; printState = null;
+  document.documentElement.style.removeProperty('--sf');
+  render();
+});
+
+/* ===================== sauvegarde ===================== */
+function snapshot(){
+  return JSON.stringify({ v: 2, name: $('className').value.trim(), room: S.room,
+    seats: S.seats, decor: S.decor, students: S.students, assign: S.assign,
+    pinned: [...S.pinned], constraints: S.constraints,
+    wide: S.wide, teacherView: S.teacherView, nameStyle: S.nameStyle });
+}
+function restore(json){
+  const d = JSON.parse(json);
+  if (d.v === 1 && d.grid){   // conversion des salles enregistrées en version 1
+    S.seats = []; S.decor = [];
+    const map = {};
+    for (let r = 0; r < d.rows; r++) for (let c = 0; c < d.cols; c++){
+      if (!d.grid[r][c]) continue;
+      const s = { id: nid('s'), g: nid('g'), rot: 0, x: 80 + c * (SW + 4) + SW / 2, y: 110 + r * (SH + 26) };
+      map[r + '-' + c] = s.id; S.seats.push(s);
+    }
+    S.assign = {};
+    Object.keys(d.assign || {}).forEach(k => { if (map[k]) S.assign[map[k]] = d.assign[k]; });
+  } else {
+    S.room = d.room || S.room; S.seats = d.seats || []; S.decor = d.decor || []; S.assign = d.assign || {};
+  }
+  S.students = d.students || []; S.pinned = new Set(d.pinned || []); S.constraints = d.constraints || [];
+  S.wide = !!d.wide; S.teacherView = !!d.teacherView; S.nameStyle = d.nameStyle || 'prenomN';
+  S.sel.clear(); S.selStudent = null;
+  $('className').value = d.name || '';
+  S.classSize = S.students.length; $('nbStudents').value = S.students.length || '';
+  $('nbSeats').value = S.seats.length || 30;
+  $('wideNeighbour').checked = S.wide; $('viewTeacher').checked = S.teacherView; $('nameStyle').value = S.nameStyle;
+  $('paste').value = S.students.map(s => (s.nom.toLocaleUpperCase('fr') + ' ' + s.prenom).trim()).join('\n');
+  fit(); fillSelects(); renderConstraints(); render(); zoomFit();
+}
+async function refreshIndex(){
+  const raw = await store.get('index');
+  const idx = raw ? JSON.parse(raw) : [];
+  $('loadSel').innerHTML = '<option value="">Ouvrir…</option>' + idx.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join('');
+}
+$('btnSave').addEventListener('click', async () => {
+  const name = $('className').value.trim();
+  if (!name) return toast('Donne un nom à la classe en haut de l\'écran.', true);
+  await store.set('class:' + name, snapshot());
+  const raw = await store.get('index');
+  const idx = raw ? JSON.parse(raw) : [];
+  if (!idx.includes(name)) idx.push(name);
+  await store.set('index', JSON.stringify(idx));
+  await refreshIndex();
+  toast(`Classe « ${name} » enregistrée.`);
+});
+$('loadSel').addEventListener('change', async e => {
+  const n = e.target.value; if (!n) return;
+  const raw = await store.get('class:' + n);
+  if (!raw) return toast('Classe introuvable.', true);
+  restore(raw); toast(`Classe « ${n} » ouverte.`);
+  e.target.value = '';
+});
+$('btnExport').addEventListener('click', () => {
+  const name = $('className').value.trim() || 'plan-de-classe';
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([snapshot()], { type: 'application/json' }));
+  a.download = name.replace(/[^\w\-]+/g, '-').toLowerCase() + '.json';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+});
+$('btnImport').addEventListener('click', () => $('fileInput').click());
+$('fileInput').addEventListener('change', e => {
+  const f = e.target.files[0]; if (!f) return;
+  const rd = new FileReader();
+  rd.onload = () => { try { restore(rd.result); toast('Fichier importé.'); } catch(err){ toast('Fichier illisible.', true); } };
+  rd.readAsText(f); e.target.value = '';
+});
+
+/* ===================== démarrage ===================== */
+renderRowLines();
+renderIlotLines();
+renderArcLines();
+renderUFields();
+buildModel('rangees');
+refreshIndex();
+</script>
+</body>
+</html>
