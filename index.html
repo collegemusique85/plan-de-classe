@@ -108,6 +108,9 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid v
   display:flex;align-items:center;justify-content:center;text-align:center;padding:3px 5px;
   font-size:var(--sf,13px);font-weight:500;overflow:hidden;user-select:none}
 .seat .nm{pointer-events:none;line-height:1.15}
+.seat.adult{background:#EDEFEC;border-style:dashed;border-color:var(--encre-doux)}
+.seat.adult .nm{font-style:italic}
+.mark .aesh{color:var(--encre-doux);font-weight:700;letter-spacing:.02em}
 .seat.free{background:#FBFAF6;color:#BEB9AC;font-size:11.5px;font-weight:400;border-style:dashed}
 .seat.occupied{cursor:grab}
 .seat.dragging{opacity:.35}
@@ -321,6 +324,15 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid v
     <details class="panel" open>
       <summary>3 · Les contraintes <span class="count" id="conCount">0</span></summary>
       <div class="body">
+        <div class="sub" style="margin-top:6px">Adulte accompagnant un élève (AESH)</div>
+        <div class="field"><label for="aeshNom">Nom de l'adulte</label>
+          <input type="text" id="aeshNom" placeholder="Mme Dubois" autocomplete="off"></div>
+        <div class="field"><label for="aeshEleve">Élève accompagné</label><select id="aeshEleve"></select></div>
+        <button class="btn primary" id="btnAddAesh" style="width:100%">Ajouter l'accompagnant</button>
+        <ul class="clist" id="aeshList"></ul>
+        <p class="hint">L'accompagnant occupe une place du plan et reste toujours à côté de son élève, y compris quand tu régénères. Il n'entre pas dans l'effectif de la classe.</p>
+
+        <div class="sub">Autres contraintes</div>
         <div class="field"><label for="cType">Type de contrainte</label>
           <select id="cType">
             <option value="separate">Ne doivent pas être voisins</option>
@@ -754,11 +766,17 @@ function parseList(txt){
 const tidy = s => s.toLocaleLowerCase('fr').replace(/(^|[\s'-])([a-zà-ÿ])/g, (m, a, b) => a + b.toLocaleUpperCase('fr')).trim();
 function label(st){
   if (!st) return '';
+  if (st.aesh) return st.prenom;
   if (S.nameStyle === 'prenom') return st.prenom || st.nom;
   if (S.nameStyle === 'complet') return (st.prenom + ' ' + st.nom.toLocaleUpperCase('fr')).trim();
   return (st.prenom + (st.nom ? ' ' + st.nom[0].toLocaleUpperCase('fr') + '.' : '')).trim();
 }
 const byId = id => S.students.find(s => s.id === id);
+const classe = () => S.students.filter(s => !s.aesh);
+const accompagnants = () => S.students.filter(s => s.aesh);
+/* Contraintes visibles + celles déduites des accompagnements */
+const allConstraints = () => S.constraints.concat(
+  accompagnants().filter(a => a.pour).map(a => ({ id: 'x-' + a.id, type: 'aesh', a: a.id, b: a.pour })));
 const seatOfStudent = id => Object.keys(S.assign).find(k => S.assign[k] === id) || null;
 const isAbsent = id => S.constraints.some(c => c.type === 'absent' && c.a === id);
 
@@ -766,8 +784,21 @@ const isAbsent = id => S.constraints.some(c => c.type === 'absent' && c.a === id
 function violations(){
   const V = [], pos = {};
   for (const k of Object.keys(S.assign)) pos[S.assign[k]] = k;
-  for (const c of S.constraints){
+  for (const c of allConstraints()){
     const A = byId(c.a), B = byId(c.b);
+    if (c.type === 'aesh'){
+      if (!A || !B || isAbsent(c.a) || isAbsent(c.b)) continue;
+      const ka = pos[c.a], kb = pos[c.b];
+      if (!ka || !kb){
+        if (ka || kb) V.push({ seats: [ka || kb], soft: true,
+          txt: `Accompagnement : ${label(A)} et ${label(B)} doivent être placés tous les deux.` });
+        continue;
+      }
+      if (!tableMates(seatById(ka)).some(s => s.id === kb))
+        V.push({ seats: [ka, kb], link: [ka, kb],
+          txt: `Accompagnement : ${label(A)} n'est pas à côté de ${label(B)}.` });
+      continue;
+    }
     if (c.type === 'absent'){
       if (pos[c.a]) V.push({ seats: [pos[c.a]], txt: `${label(A)} est noté absent mais il est placé.` });
       continue;
@@ -799,10 +830,13 @@ function violations(){
   }
   const placed = Object.keys(S.assign).length;
   const toPlace = S.students.filter(s => !isAbsent(s.id)).length;
+  const nbA = accompagnants().filter(s => !isAbsent(s.id)).length;
   if (toPlace > S.seats.length)
-    V.push({ seats: [], txt: `Il manque ${toPlace - S.seats.length} place(s) : ${toPlace} élèves pour ${S.seats.length} places.` });
+    V.push({ seats: [], txt: `Il manque ${toPlace - S.seats.length} place(s) : ${toPlace - nbA} élèves`
+      + (nbA ? ` et ${nbA} accompagnant${nbA > 1 ? 's' : ''}` : '') + ` pour ${S.seats.length} places.` });
   else if (placed < toPlace)
     V.push({ seats: [], soft: true, txt: `${toPlace - placed} élève(s) restent sur le banc, en bas de l'écran.` });
+  V.forEach(v => v.txt = v.txt.replace(/\.\.$/, '.'));
   return V;
 }
 
@@ -832,7 +866,7 @@ function solve(){
   const slotSeat = [];
   for (let i = 0; i < nSlots; i++) slotSeat.push(i < free.length ? free[i] : -1);
 
-  const cons = S.constraints.filter(c => c.type !== 'absent')
+  const cons = allConstraints().filter(c => c.type !== 'absent')
     .filter(c => byId(c.a) && !isAbsent(c.a) && (!c.b || (byId(c.b) && !isAbsent(c.b))));
 
   let occ = new Set();
@@ -849,6 +883,10 @@ function solve(){
         const pb = pos[c.b];
         if (pb === undefined || pa < 0 || pb < 0){ x += 50; continue; }
         if (!nb[pa].includes(pb)) x += 55;
+      } else if (c.type === 'aesh'){
+        const pb = pos[c.b];
+        if (pb === undefined || pa < 0 || pb < 0){ x += 130; continue; }
+        if (!nbT[pa].includes(pb)) x += 130;
       } else if (c.type === 'alone'){
         if (pa < 0) continue;
         for (const n of nbT[pa]) if (occ.has(n)) x += 70;
@@ -958,7 +996,7 @@ function render(){
     const sid = S.assign[s.id];
     const st = byId(sid);
     let cls = 'seat';
-    if (st) cls += ' occupied'; else cls += ' free';
+    if (st) cls += ' occupied' + (st.aesh ? ' adult' : ''); else cls += ' free';
     if (S.sel.has(s.id)) cls += ' selected';
     if (S.selStudent && S.selStudent === sid) cls += ' selected';
     if (bad.has(s.id)) cls += ' conflict';
@@ -972,6 +1010,7 @@ function render(){
     const flip = (a > 90 && a < 270) ? 180 : 0;   // le nom reste toujours lisible
     el.innerHTML = `<span class="nm" style="transform:rotate(${flip}deg)">${esc(st ? label(st) : 'libre')}</span>`;
     const marks = [];
+    if (st && st.aesh) marks.push('<span class="aesh">AESH</span>');
     if (sid && S.pinned.has(sid)) marks.push('📌');
     if (bad.has(s.id)) marks.push('<span class="warn">!</span>');
     if (marks.length) el.innerHTML += `<span class="mark">${marks.join('')}</span>`;
@@ -983,19 +1022,22 @@ function render(){
   renderAlerts(V);
   renderCtx();
   $('seatCount').textContent = S.seats.length + ' places';
-  const eleves = S.students.length || S.classSize || 0;
+  const nbAcc = accompagnants().length;
+  const eleves = (classe().length || S.classSize || 0) + nbAcc;
   const p = S.seats.length;
   let txt = p ? `${p} place${p > 1 ? 's' : ''} dans la salle` : 'Aucune place pour le moment';
   if (eleves){
     const d = p - eleves;
-    txt += ` pour ${eleves} élèves — ` + (d === 0 ? 'le compte est juste'
+    txt += ` pour ${eleves - nbAcc} élèves`
+      + (nbAcc ? ` et ${nbAcc} accompagnant${nbAcc > 1 ? 's' : ''}` : '') + ` — ` + (d === 0 ? 'le compte est juste'
       : d > 0 ? `${d} place${d > 1 ? 's' : ''} libre${d > 1 ? 's' : ''}`
               : `il manque ${-d} place${-d > 1 ? 's' : ''}`);
   }
   const st = $('roomStatus');
   st.textContent = txt;
   st.style.color = (eleves && p < eleves) ? 'var(--rouge)' : '';
-  $('stuCount').textContent = S.students.length;
+  const nbA = accompagnants().length;
+  $('stuCount').textContent = classe().length + (nbA ? ' + ' + nbA : '');
   $('conCount').textContent = S.constraints.length;
   $('zLabel').textContent = Math.round(S.zoom * 100) + ' %';
   $('tip').textContent = S.mode === 'room'
@@ -1419,8 +1461,11 @@ $('pool').addEventListener('click', e => {
 /* ===================== contraintes ===================== */
 const needsB = t => t === 'separate' || t === 'together';
 function fillSelects(){
-  const opts = S.students.map(s => `<option value="${s.id}">${esc(label(s))}</option>`).join('');
+  const opts = S.students.map(s =>
+    `<option value="${s.id}">${esc(label(s))}${s.aesh ? ' (AESH)' : ''}</option>`).join('');
   $('cA').innerHTML = opts; $('cB').innerHTML = opts;
+  $('aeshEleve').innerHTML = classe().map(s =>
+    `<option value="${s.id}">${esc(label(s))}</option>`).join('');
 }
 function typeLabel(c){
   const A = label(byId(c.a)), B = label(byId(c.b));
@@ -1429,6 +1474,26 @@ function typeLabel(c){
     left:`${A} — côté gauche`, right:`${A} — côté droit`, absent:`${A} — absent` }[c.type] || '';
 }
 const typeClass = t => ({ separate:'sep', together:'tog', alone:'solo', absent:'absent' }[t] || 'zone');
+function renderAesh(){
+  const ul = $('aeshList');
+  ul.innerHTML = '';
+  accompagnants().forEach(a => {
+    const li = document.createElement('li');
+    li.className = 'solo';
+    const e = byId(a.pour);
+    li.innerHTML = `<span>${esc(a.prenom)} — accompagne ${esc(e ? label(e) : '?')}</span>` +
+      `<button class="x" title="Retirer">×</button>`;
+    li.querySelector('.x').onclick = () => {
+      const k = seatOfStudent(a.id);
+      if (k) delete S.assign[k];
+      S.pinned.delete(a.id);
+      S.students = S.students.filter(s => s.id !== a.id);
+      S.constraints = S.constraints.filter(c => c.a !== a.id && c.b !== a.id);
+      fillSelects(); renderAesh(); renderConstraints(); render();
+    };
+    ul.appendChild(li);
+  });
+}
 function renderConstraints(){
   const ul = $('clist'); ul.innerHTML = '';
   S.constraints.forEach(c => {
@@ -1443,6 +1508,19 @@ function renderConstraints(){
   $('conCount').textContent = S.constraints.length;
 }
 $('cType').addEventListener('change', e => { $('wrapB').style.display = needsB(e.target.value) ? 'block' : 'none'; });
+$('btnAddAesh').addEventListener('click', () => {
+  const nom = $('aeshNom').value.trim();
+  const eleve = $('aeshEleve').value;
+  if (!nom) return toast('Indique le nom de l\'adulte.', true);
+  if (!eleve) return toast('Charge d\'abord la liste de la classe.', true);
+  if (accompagnants().some(a => a.prenom.toLowerCase() === nom.toLowerCase() && a.pour === eleve))
+    return toast('Cet accompagnement est déjà enregistré.', true);
+  S.students.push({ id: nid('p'), prenom: nom, nom: '', aesh: true, pour: eleve });
+  $('aeshNom').value = '';
+  fillSelects(); renderAesh(); render();
+  toast(`${nom} accompagne ${label(byId(eleve))}.`);
+});
+$('aeshNom').addEventListener('keydown', e => { if (e.key === 'Enter') $('btnAddAesh').click(); });
 $('btnAddC').addEventListener('click', () => {
   const t = $('cType').value, a = $('cA').value, b = $('cB').value;
   if (!a) return toast('Charge d\'abord la liste de la classe.', true);
@@ -1469,11 +1547,11 @@ $('btnLoadStudents').addEventListener('click', () => {
   if (!list.length) return toast('Aucun élève reconnu dans la liste.', true);
   S.students = list; S.assign = {}; S.pinned.clear(); S.constraints = []; S.selStudent = null;
   S.classSize = list.length; $('nbStudents').value = list.length;
-  fillSelects(); renderConstraints(); render();
+  fillSelects(); renderAesh(); renderConstraints(); render();
   $('loadNote').textContent = `${list.length} élèves chargés. Les contraintes précédentes ont été effacées.`;
   toast(`${list.length} élèves chargés.`);
 });
-$('nameStyle').addEventListener('change', e => { S.nameStyle = e.target.value; fillSelects(); renderConstraints(); render(); });
+$('nameStyle').addEventListener('change', e => { S.nameStyle = e.target.value; fillSelects(); renderAesh(); renderConstraints(); render(); });
 $('models').addEventListener('click', e => { const b = e.target.closest('[data-model]'); if (b) buildModel(b.dataset.model); });
 $('nbStudents').addEventListener('input', e => { S.classSize = +e.target.value || 0; render(); });
 $('nbSeats').addEventListener('input', render);
@@ -1568,11 +1646,11 @@ function restore(json){
   S.wide = !!d.wide; S.teacherView = !!d.teacherView; S.nameStyle = d.nameStyle || 'prenomN';
   S.sel.clear(); S.selStudent = null;
   $('className').value = d.name || '';
-  S.classSize = S.students.length; $('nbStudents').value = S.students.length || '';
+  S.classSize = classe().length; $('nbStudents').value = classe().length || '';
   $('nbSeats').value = S.seats.length || 30;
   $('wideNeighbour').checked = S.wide; $('viewTeacher').checked = S.teacherView; $('nameStyle').value = S.nameStyle;
-  $('paste').value = S.students.map(s => (s.nom.toLocaleUpperCase('fr') + ' ' + s.prenom).trim()).join('\n');
-  fit(); fillSelects(); renderConstraints(); render(); zoomFit();
+  $('paste').value = classe().map(s => (s.nom.toLocaleUpperCase('fr') + ' ' + s.prenom).trim()).join('\n');
+  fit(); fillSelects(); renderAesh(); renderConstraints(); render(); zoomFit();
 }
 async function refreshIndex(){
   const raw = await store.get('index');
@@ -1614,6 +1692,7 @@ $('fileInput').addEventListener('change', e => {
 });
 
 /* ===================== démarrage ===================== */
+renderAesh();
 renderRowLines();
 renderIlotLines();
 renderArcLines();
